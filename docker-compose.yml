@@ -24,11 +24,8 @@ services:
     restart: on-failure
     depends_on:
       - postgres
-    networks:
-      - database-network
 
-volumes:
-  postgres-vol:
+
 networks:
   database-network:
-    external: false
+    driver: bridge

@@ -5,6 +5,12 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+    build: {
+        outDir: 'dist', 
+        rollupOptions: {
+            input: './index.html', // index.html
+        },
+    },
     plugins: [
         vue(),
         vueDevTools()
