@@ -6,7 +6,7 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 // https://vitejs.dev/config/
 export default defineConfig({
     build: {
-        outDir: 'dist', 
+        outDir: 'dist',
         rollupOptions: {
             input: './index.html', // index.html
         },
