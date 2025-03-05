@@ -14,11 +14,11 @@ services:
     networks:
       - database-network
 
-  application:
+  backend:
     build:
-      context: .
+      context: ./backend/airplane
       dockerfile: Dockerfile
-    container_name: application
+    container_name: backend
     ports:
       - "8080:8080"
     restart: on-failure
@@ -26,6 +26,20 @@ services:
       - postgres
 
 
+  frontend:
+    build:
+      context: ./frontend/flightplanner
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
 networks:
   database-network:
+    driver: bridge
+  app-network:
     driver: bridge
