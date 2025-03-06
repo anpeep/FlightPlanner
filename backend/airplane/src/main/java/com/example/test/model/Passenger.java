@@ -9,7 +9,7 @@ import lombok.Setter;
 @Getter
 @Entity
 
-public class Client {
+public class Passenger {
     @Id
     private Long id;
 

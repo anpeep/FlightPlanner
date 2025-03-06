@@ -7,7 +7,7 @@ import java.util.List;
 
 @Data
 @Builder
-public class ClientDTO {
+public class PassengerDTO {
     private Long id;
     private List<TicketDTO> tickets;
 }

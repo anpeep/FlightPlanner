@@ -4,4 +4,89 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="1" author="developer">
+        <createTable tableName="Ticket">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="departure_city" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="arrival_city" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="flight_date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="flight_time" type="time">
+                <constraints nullable="false"/>
+            </column>
+            <column name="available" type="boolean" defaultValueBoolean="true"/>
+            <column name="price" type="float">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+
+
+    <changeSet id="3" author="developer">
+        <createTable tableName="Passenger">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="2" author="developer">
+        <createTable tableName="Filters">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="ticket_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="window_seat" type="BOOLEAN" defaultValueBoolean="false"/>
+            <column name="leg_room" type="BOOLEAN" defaultValueBoolean="false"/>
+            <column name="near_boarding" type="BOOLEAN" defaultValueBoolean="false"/>
+        </createTable>
+
+        <!-- Lisa Foreign Key eraldi -->
+        <addForeignKeyConstraint baseTableName="Filters"
+                                 baseColumnNames="ticket_id"
+                                 referencedTableName="Ticket"
+                                 referencedColumnNames="id"
+                                 constraintName="fk_filters_ticket"
+                                 onDelete="CASCADE"/>
+    </changeSet>
+    <changeSet id="4" author="developer">
+        <createTable tableName="Passenger_Tickets">
+            <column name="passenger_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ticket_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Lisa Foreign Keys -->
+        <addForeignKeyConstraint baseTableName="Passenger_Tickets"
+                                 baseColumnNames="passenger_id"
+                                 referencedTableName="Passenger"
+                                 referencedColumnNames="id"
+                                 constraintName="fk_passenger_ticket_passenger"
+                                 onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint baseTableName="Passenger_Tickets"
+                                 baseColumnNames="ticket_id"
+                                 referencedTableName="Ticket"
+                                 referencedColumnNames="id"
+                                 constraintName="fk_passenger_ticket_ticket"
+                                 onDelete="CASCADE"/>
+    </changeSet>
+
 </databaseChangeLog>
+

@@ -22,5 +22,5 @@ public class Ticket {
     private boolean nearBoarding;
     @ManyToOne
     @JoinColumn(name = "client_id")
-    private Client client;
+    private Passenger passenger;
 }

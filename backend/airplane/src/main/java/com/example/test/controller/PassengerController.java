@@ -1,6 +1,6 @@
 package com.example.test.controller;
 
-public class ClientController {
+public class PassengerController {
     // post Ticket
     // get Ticket
     // post preferences

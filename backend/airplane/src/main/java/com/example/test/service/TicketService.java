@@ -2,12 +2,11 @@ package com.example.test.service;
 
 import com.example.test.dto.TicketDTO;
 import com.example.test.mapping.TicketMapper;
-import com.example.test.repository.ClientRepository;
+import com.example.test.repository.PassengerRepository;
 import com.example.test.repository.TicketRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -15,7 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TicketService {
     private final TicketRepository ticketRepository;
-    private final ClientRepository clientRepository;
+    private final PassengerRepository passengerRepository;
     private final TicketMapper ticketMapper;
     private float getTicketPrice(TicketDTO ticket) {
         //TODO
