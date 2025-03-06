@@ -11,5 +11,4 @@ public class PlaneDTO {
     private String airport;
     private int departureTime;
     private int arrivalTime;
-    private List<SeatDTO> seats;
 }

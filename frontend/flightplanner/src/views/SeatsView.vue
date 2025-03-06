@@ -1,31 +1,32 @@
 <template>
-  <div class="seating">
-    <div v-for="row in seats" :key="row.row" class="row">
-      <!-- Left Seats-->
-      <div class="seat-group">
-        <Seat
-            v-for="seat in row.seats.filter(s => ['A', 'B', 'C'].includes(s.position))"
-            :key="seat.position + row.row"
-            :number="seat.position + row.row"
-            :isBooked="seat.booked"
-            :classType="seat.class"
-            @toggle="toggleSeat(row.row, seat.position)"
-        />
-      </div>
+  <div class="seating-view">
+    <SidePanel />
 
-      <!-- Aisle -->
-      <div class="aisle"></div>
+    <div class="seating">
+      <div v-for="row in seats" :key="row.row" class="row">
+        <div class="seat-group">
+          <Seat
+              v-for="seat in row.seats.filter(s => ['A', 'B', 'C'].includes(s.position))"
+              :key="seat.position + row.row"
+              :number="seat.position + row.row"
+              :isBooked="seat.booked"
+              :classType="seat.class"
+              @toggle="toggleSeat(row.row, seat.position)"
+          />
+        </div>
 
-      <!-- Right Seats -->
-      <div class="seat-group">
-        <Seat
-            v-for="seat in row.seats.filter(s => ['D', 'F', 'G'].includes(s.position))"
-            :key="seat.position + row.row"
-            :number="seat.position + row.row"
-            :isBooked="seat.booked"
-            :classType="seat.class"
-            @toggle="toggleSeat(row.row, seat.position)"
-        />
+        <div class="aisle"></div>
+
+        <div class="seat-group">
+          <Seat
+              v-for="seat in row.seats.filter(s => ['D', 'F', 'G'].includes(s.position))"
+              :key="seat.position + row.row"
+              :number="seat.position + row.row"
+              :isBooked="seat.booked"
+              :classType="seat.class"
+              @toggle="toggleSeat(row.row, seat.position)"
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -33,9 +34,10 @@
 
 <script>
 import Seat from "@/components/Seat.vue";
+import SidePanel from "@/components/SidePanel.vue";
 
 export default {
-  components: { Seat },
+  components: { Seat, SidePanel },
   data() {
     return {
       seats: Array.from({ length: 17 }, (_, index) => {
@@ -59,7 +61,7 @@ export default {
         };
       })
     };
-},
+  },
   methods: {
     toggleSeat(rowNumber, position) {
       this.seats = this.seats.map(row => {

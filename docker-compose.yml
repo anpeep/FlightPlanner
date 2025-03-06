@@ -39,7 +39,7 @@ services:
       - app-network
 
 networks:
-  database-network:
-    driver: bridge
   app-network:
+    driver: bridge
+  database-network:
     driver: bridge
