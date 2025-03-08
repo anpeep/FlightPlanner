@@ -7,8 +7,50 @@
 
     <changeSet id="1" author="developer">
         <createTable tableName="Ticket">
-            <column name="id" type="bigint" autoIncrement="true">
+            <column name="id" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="seat_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="flight_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="price" type="float">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="Plane">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="Seat">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="plane_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_more_leg_room" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="Flight">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="plane_id" type="int">
+                <constraints nullable="false"/>
             </column>
             <column name="departure_city" type="varchar(255)">
                 <constraints nullable="false"/>
@@ -16,77 +58,45 @@
             <column name="arrival_city" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="flight_date" type="date">
+            <column name="depart_on" type="DATETIME">
                 <constraints nullable="false"/>
             </column>
-            <column name="flight_time" type="time">
-                <constraints nullable="false"/>
-            </column>
-            <column name="available" type="boolean" defaultValueBoolean="true"/>
-            <column name="price" type="float">
+            <column name="arrive_on" type="DATETIME">
                 <constraints nullable="false"/>
             </column>
         </createTable>
-    </changeSet>
+            <!-- Foreign key: Ticket.seat_id references Seat.id -->
+            <addForeignKeyConstraint
+                    baseTableName="Ticket"
+                    baseColumnNames="seat_id"
+                    referencedTableName="Seat"
+                    referencedColumnNames="id"
+                    constraintName="fk_ticket_seat"/>
 
+            <!-- Foreign key: Ticket.flight_id references Flight.id -->
+            <addForeignKeyConstraint
+                    baseTableName="Ticket"
+                    baseColumnNames="flight_id"
+                    referencedTableName="Flight"
+                    referencedColumnNames="id"
+                    constraintName="fk_ticket_flight"/>
 
+            <!-- Foreign key: Seat.plane_id references Plane.id -->
+            <addForeignKeyConstraint
+                    baseTableName="Seat"
+                    baseColumnNames="plane_id"
+                    referencedTableName="Plane"
+                    referencedColumnNames="id"
+                    constraintName="fk_seat_plane"/>
 
-    <changeSet id="3" author="developer">
-        <createTable tableName="Passenger">
-            <column name="id" type="bigint" autoIncrement="true">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-            <column name="name" type="varchar(255)">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
-    </changeSet>
-    <changeSet id="2" author="developer">
-        <createTable tableName="Filters">
-            <column name="id" type="BIGINT" autoIncrement="true">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-            <column name="ticket_id" type="BIGINT">
-                <constraints nullable="false"/>
-            </column>
-            <column name="window_seat" type="BOOLEAN" defaultValueBoolean="false"/>
-            <column name="leg_room" type="BOOLEAN" defaultValueBoolean="false"/>
-            <column name="near_boarding" type="BOOLEAN" defaultValueBoolean="false"/>
-        </createTable>
-
-        <!-- Lisa Foreign Key eraldi -->
-        <addForeignKeyConstraint baseTableName="Filters"
-                                 baseColumnNames="ticket_id"
-                                 referencedTableName="Ticket"
-                                 referencedColumnNames="id"
-                                 constraintName="fk_filters_ticket"
-                                 onDelete="CASCADE"/>
-    </changeSet>
-    <changeSet id="4" author="developer">
-        <createTable tableName="Passenger_Tickets">
-            <column name="passenger_id" type="BIGINT">
-                <constraints nullable="false"/>
-            </column>
-            <column name="ticket_id" type="BIGINT">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
-
-        <!-- Lisa Foreign Keys -->
-        <addForeignKeyConstraint baseTableName="Passenger_Tickets"
-                                 baseColumnNames="passenger_id"
-                                 referencedTableName="Passenger"
-                                 referencedColumnNames="id"
-                                 constraintName="fk_passenger_ticket_passenger"
-                                 onDelete="CASCADE"/>
-
-        <addForeignKeyConstraint baseTableName="Passenger_Tickets"
-                                 baseColumnNames="ticket_id"
-                                 referencedTableName="Ticket"
-                                 referencedColumnNames="id"
-                                 constraintName="fk_passenger_ticket_ticket"
-                                 onDelete="CASCADE"/>
-    </changeSet>
+            <!-- Foreign key: Flight.plane_id references Plane.id -->
+            <addForeignKeyConstraint
+                    baseTableName="Flight"
+                    baseColumnNames="plane_id"
+                    referencedTableName="Plane"
+                    referencedColumnNames="id"
+                    constraintName="fk_flight_plane"/>
+        </changeSet>
 
 </databaseChangeLog>
 

@@ -1,5 +1,4 @@
 package com.example.test.model;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -8,17 +7,16 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Setter
-@Entity
 @Getter
-public class Ticket {
+@Entity
+public class Seat {
     @Id
     private Integer id;
     @ManyToOne
-    @JoinColumn(name = "seatId")
-    private Seat seat;
-    @ManyToOne
-    @JoinColumn(name = "flightId")
-    private Flight flight;
-    private Float price;
+    @JoinColumn(name = "planeId")
+    private Plane plane;
+    private String name;
+    private String type;
+    private boolean isMoreLegRoom;
 
 }

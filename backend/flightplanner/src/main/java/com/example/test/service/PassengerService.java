@@ -1,15 +1,7 @@
 package com.example.test.service;
 
-import com.example.test.dto.TicketDTO;
-import com.example.test.mapping.PassengerMapper;
-import com.example.test.mapping.TicketMapper;
-import com.example.test.model.Ticket;
-import com.example.test.repository.PassengerRepository;
-import com.example.test.repository.TicketRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
