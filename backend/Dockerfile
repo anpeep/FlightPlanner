@@ -5,8 +5,8 @@ FROM jelastic/maven:3.9.5-openjdk-21 AS build
 WORKDIR /app
 
 # Copy the pom.xml and source code
-COPY ./airplane/pom.xml .
-COPY ./airplane/src ./src
+COPY ./flightplanner/pom.xml .
+COPY ./flightplanner/src ./src
 # Build the application
 RUN mvn clean package -DskipTests
 RUN ls -al /app/target
@@ -22,7 +22,7 @@ FROM openjdk:21-jdk
 WORKDIR /app
 
 # Copy the JAR file from the build stage (ensure the path is correct)
-COPY --from=build /app/target/airplane-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=build /app/target/flightplanner-0.0.1-SNAPSHOT.jar app.jar
 # Expose the port
 EXPOSE 8080
 
