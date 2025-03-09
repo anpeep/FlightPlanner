@@ -1,7 +1,4 @@
 package com.example.test.dto;
-import com.example.test.model.Plane;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import lombok.Builder;
 import lombok.Data;
 

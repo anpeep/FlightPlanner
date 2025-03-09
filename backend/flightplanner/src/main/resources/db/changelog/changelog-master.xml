@@ -65,38 +65,37 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
-            <!-- Foreign key: Ticket.seat_id references Seat.id -->
-            <addForeignKeyConstraint
-                    baseTableName="Ticket"
-                    baseColumnNames="seat_id"
-                    referencedTableName="Seat"
-                    referencedColumnNames="id"
-                    constraintName="fk_ticket_seat"/>
+        <!-- Foreign key: Ticket.seat_id references Seat.id -->
+        <addForeignKeyConstraint
+                baseTableName="Ticket"
+                baseColumnNames="seat_id"
+                referencedTableName="Seat"
+                referencedColumnNames="id"
+                constraintName="fk_ticket_seat"/>
 
-            <!-- Foreign key: Ticket.flight_id references Flight.id -->
-            <addForeignKeyConstraint
-                    baseTableName="Ticket"
-                    baseColumnNames="flight_id"
-                    referencedTableName="Flight"
-                    referencedColumnNames="id"
-                    constraintName="fk_ticket_flight"/>
+        <!-- Foreign key: Ticket.flight_id references Flight.id -->
+        <addForeignKeyConstraint
+                baseTableName="Ticket"
+                baseColumnNames="flight_id"
+                referencedTableName="Flight"
+                referencedColumnNames="id"
+                constraintName="fk_ticket_flight"/>
 
-            <!-- Foreign key: Seat.plane_id references Plane.id -->
-            <addForeignKeyConstraint
-                    baseTableName="Seat"
-                    baseColumnNames="plane_id"
-                    referencedTableName="Plane"
-                    referencedColumnNames="id"
-                    constraintName="fk_seat_plane"/>
+        <!-- Foreign key: Seat.plane_id references Plane.id -->
+        <addForeignKeyConstraint
+                baseTableName="Seat"
+                baseColumnNames="plane_id"
+                referencedTableName="Plane"
+                referencedColumnNames="id"
+                constraintName="fk_seat_plane"/>
 
-            <!-- Foreign key: Flight.plane_id references Plane.id -->
-            <addForeignKeyConstraint
-                    baseTableName="Flight"
-                    baseColumnNames="plane_id"
-                    referencedTableName="Plane"
-                    referencedColumnNames="id"
-                    constraintName="fk_flight_plane"/>
-        </changeSet>
+        <!-- Foreign key: Flight.plane_id references Plane.id -->
+        <addForeignKeyConstraint
+                baseTableName="Flight"
+                baseColumnNames="plane_id"
+                referencedTableName="Plane"
+                referencedColumnNames="id"
+                constraintName="fk_flight_plane"/>
+    </changeSet>
 
 </databaseChangeLog>
-

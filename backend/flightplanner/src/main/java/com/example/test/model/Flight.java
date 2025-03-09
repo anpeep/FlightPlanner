@@ -18,8 +18,4 @@ public class Flight {
     private String arrivalCity;
     private Instant departOn;
     private Instant arriveOn;
-    @ManyToOne
-    @JoinColumn(name = "planeId")
-    private Plane plane;
-
 }

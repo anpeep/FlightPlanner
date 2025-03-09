@@ -12,9 +12,6 @@ import lombok.Setter;
 public class Seat {
     @Id
     private Integer id;
-    @ManyToOne
-    @JoinColumn(name = "planeId")
-    private Plane plane;
     private String name;
     private String type;
     private boolean isMoreLegRoom;
