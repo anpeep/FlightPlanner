@@ -5,8 +5,8 @@ FROM jelastic/maven:3.9.5-openjdk-21 AS build
 WORKDIR /app
 
 # Copy the pom.xml and source code
-COPY ./flightplanner/pom.xml .
-COPY ./flightplanner/src ./src
+COPY ./pom.xml .
+COPY ./src ./src
 # Build the application
 RUN mvn clean package -DskipTests
 RUN ls -al /app/target

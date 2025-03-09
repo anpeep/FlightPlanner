@@ -1,0 +1,340 @@
+[
+  {
+    "filter": "LEGROOM_EXIT_WINDOW",
+    "row": 1,
+    "column": "1A",
+    "type": "business"
+  },
+  {
+    "filter": "LEGROOM_EXIT",
+    "row": 1,
+    "column": "B",
+    "type": "business"
+  },
+  {
+    "filter": "LEGROOM_EXIT",
+    "row": 1,
+    "column": "E",
+    "type": "business"
+  },
+  {
+    "filter": "LEGROOM_EXIT_WINDOW",
+    "row": 1,
+    "column": "F",
+    "type": "business"
+  },
+  {
+    "filter": "LEGROOM_EXIT_WINDOW",
+    "row": 2,
+    "column": "A",
+    "type": "business"
+  },
+  {
+    "filter": "LEGROOM_EXIT",
+    "row": 2,
+    "column": "B",
+    "type": "business"
+  },
+  {
+    "filter": "LEGROOM_EXIT",
+    "row": 2,
+    "column": "C",
+    "type": "business"
+  },
+  {
+    "filter": "LEGROOM_EXIT",
+    "row": 2,
+    "column": "D",
+    "type": "business"
+  },
+  {
+    "filter": "LEGROOM_EXIT",
+    "row": 2,
+    "column": "E",
+    "type": "business"
+  },
+  {
+    "filter": "LEGROOM_EXIT_WINDOW",
+    "row": 2,
+    "column": "F",
+    "type": "business"
+  },
+
+  {
+    "filter": "WINDOW",
+    "row": 3,
+    "column": "A",
+    "type": "business"
+  },
+  {
+    "filter": "NONE",
+    "row": 3,
+    "column": "B",
+    "type": "business"
+  },
+  {
+    "filter": "NONE",
+    "row": 3,
+    "column": "C",
+    "type": "business"
+  },
+  {
+    "filter": "NONE",
+    "row": 3,
+    "column": "D",
+    "type": "business"
+  },
+  {
+    "filter": "NONE",
+    "row": 3,
+    "column": "E",
+    "type": "business"
+  },
+  {
+    "filter": "WINDOW",
+    "row": 3,
+    "column": "F",
+    "type": "business"
+  },
+
+  {
+    "filter": "WINDOW",
+    "row": 4,
+    "column": "A",
+    "type": "business"
+  },
+  {
+    "filter": "NONE",
+    "row": 4,
+    "column": "B",
+    "type": "business"
+  },
+  {
+    "filter": "NONE",
+    "row": 4,
+    "column": "C",
+    "type": "business"
+  },
+  {
+    "filter": "NONE",
+    "row": 4,
+    "column": "D",
+    "type": "business"
+  },
+  {
+    "filter": "NONE",
+    "row": 4,
+    "column": "E",
+    "type": "business"
+  },
+  {
+    "filter": "WINDOW",
+    "row": 4,
+    "column": "F",
+    "type": "business"
+  },
+  {
+    "filter": "EXIT",
+    "row": 5,
+    "column": "C",
+    "type": "economy"
+  },
+  {
+    "filter": "EXIT",
+    "row": 5,
+    "column": "D",
+    "type": "economy"
+  },
+  {
+    "filter": "LEGROOM_EXIT_WINDOW",
+    "row": 6,
+    "column": "A",
+    "type": "economy"
+  },
+  {
+    "filter": "LEGROOM_EXIT",
+    "row": 6,
+    "column": "B",
+    "type": "economy"
+  },
+  {
+    "filter": "LEGROOM_EXIT",
+    "row": 6,
+    "column": "C",
+    "type": "economy"
+  },
+  {
+    "filter": "LEGROOM_EXIT",
+    "row": 6,
+    "column": "D",
+    "type": "economy"
+  },
+  {
+    "filter": "LEGROOM_EXIT",
+    "row": 6,
+    "column": "E",
+    "type": "economy"
+  },
+  {
+    "filter": "LEGROOM_EXIT_WINDOW",
+    "row": 6,
+    "column": "F",
+    "type": "economy"
+  },
+  {
+    "filter": "WINDOW",
+    "row": 7,
+    "column": "A",
+    "type": "economy"
+  },
+  {
+    "filter": "NONE",
+    "row": 7,
+    "column": "B",
+    "type": "economy"
+  },
+  {
+    "filter": "NONE",
+    "row": 7,
+    "column": "C",
+    "type": "economy"
+  },
+  {
+    "filter": "NONE",
+    "row": 7,
+    "column": "D",
+    "type": "economy"
+  },
+  {
+    "filter": "NONE",
+    "row": 7,
+    "column": "E",
+    "type": "economy"
+  },
+  {
+    "filter": "WINDOW",
+    "row": 7,
+    "column": "F",
+    "type": "economy"
+  },
+  {
+    "filter": "WINDOW",
+    "row": 8,
+    "column": "A",
+    "type": "economy"
+  },
+  {
+    "filter": "NONE",
+    "row": 8,
+    "column": "B",
+    "type": "economy"
+  },
+  {
+    "filter": "NONE",
+    "row": 8,
+    "column": "C",
+    "type": "economy"
+  },
+  {
+    "filter": "NONE",
+    "row": 8,
+    "column": "D",
+    "type": "economy"
+  },
+  {
+    "filter": "NONE",
+    "row": 8,
+    "column": "E",
+    "type": "economy"
+  },
+  {
+    "filter": "WINDOW",
+    "row": 8,
+    "column": "F",
+    "type": "economy"
+  },
+  {
+    "filter": "WINDOW",
+    "row": 9,
+    "column": "A",
+    "type": "economy"
+  },
+  {
+    "filter": "NONE",
+    "row": 9,
+    "column": "B",
+    "type": "economy"
+  },
+  {
+    "filter": "NONE",
+    "row": 9,
+    "column": "C",
+    "type": "economy"
+  },
+  {
+    "filter": "NONE",
+    "row": 9,
+    "column": "D",
+    "type": "economy"
+  },
+  {
+    "filter": "NONE",
+    "row": 9,
+    "column": "E",
+    "type": "economy"
+  },
+  {
+    "filter": "WINDOW",
+    "row": 9,
+    "column": "F",
+    "type": "economy"
+  },
+  {
+    "filter": "EXIT",
+    "row": 10,
+    "column": "C",
+    "type": "economy"
+  },
+  {
+    "filter": "EXIT",
+    "row": 10,
+    "column": "D",
+    "type": "economy"
+  },
+  {
+    "filter": "LEGROOM_EXIT_WINDOW",
+    "row": 11,
+    "column": "A",
+    "type": "economy"
+  },
+  {
+    "filter": "LEGROOM_EXIT",
+    "row": 11,
+    "column": "B",
+    "type": "economy"
+  },
+  {
+    "filter": "LEGROOM_EXIT",
+    "row": 11,
+    "column": "C",
+    "type": "economy"
+  },
+  {
+    "filter": "LEGROOM_EXIT",
+    "row": 11,
+    "column": "D",
+    "type": "economy"
+  },
+  {
+    "filter": "LEGROOM_EXIT",
+    "row": 11,
+    "column": "E",
+    "type": "economy"
+  },
+  {
+    "filter": "LEGROOM_EXIT_WINDOW",
+    "row": 11,
+    "column": "F",
+    "type": "economy"
+  }
+]

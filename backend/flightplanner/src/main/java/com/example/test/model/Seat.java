@@ -1,19 +1,18 @@
 package com.example.test.model;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 @Setter
 @Getter
 @Entity
+@Table(name = "seat")
 public class Seat {
     @Id
-    private Integer id;
-    private String name;
-    private String type;
-    private boolean isMoreLegRoom;
-
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private String id;
+    @ManyToOne
+    @JoinColumn(name = "plane_id")
+    private Plane plane;
+    private Boolean available;
 }

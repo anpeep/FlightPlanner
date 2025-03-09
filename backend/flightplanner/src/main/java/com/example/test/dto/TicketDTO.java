@@ -7,7 +7,7 @@ import lombok.Data;
 @Builder
 public class TicketDTO {
     private Integer id;
-    private Integer seatId;
+    private String seatId;
     private Integer flightId;
     private Float price;
 }

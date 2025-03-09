@@ -9,6 +9,4 @@ import java.util.List;
 public class PlaneDTO {
     private List<FlightDTO> flights;
     private Integer id;
-
-
 }

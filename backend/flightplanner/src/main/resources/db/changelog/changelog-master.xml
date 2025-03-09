@@ -10,7 +10,7 @@
             <column name="id" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="seat_id" type="int">
+            <column name="seat_string" type="varchar(3)">
                 <constraints nullable="false"/>
             </column>
             <column name="flight_id" type="int">
@@ -28,19 +28,13 @@
         </createTable>
 
         <createTable tableName="Seat">
-            <column name="id" type="int" autoIncrement="true">
+            <column name="id" type="varchar(3)">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="plane_id" type="int">
                 <constraints nullable="false"/>
             </column>
-            <column name="name" type="text">
-                <constraints nullable="false"/>
-            </column>
-            <column name="type" type="text">
-                <constraints nullable="false"/>
-            </column>
-            <column name="is_more_leg_room" type="boolean">
+            <column name="available" type="boolean">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -65,10 +59,10 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
-        <!-- Foreign key: Ticket.seat_id references Seat.id -->
+        <!-- Foreign key: Ticket.seat_string references Seating.id -->
         <addForeignKeyConstraint
                 baseTableName="Ticket"
-                baseColumnNames="seat_id"
+                baseColumnNames="seat_string"
                 referencedTableName="Seat"
                 referencedColumnNames="id"
                 constraintName="fk_ticket_seat"/>
@@ -81,7 +75,7 @@
                 referencedColumnNames="id"
                 constraintName="fk_ticket_flight"/>
 
-        <!-- Foreign key: Seat.plane_id references Plane.id -->
+        <!-- Foreign key: Seating.plane_id references Plane.id -->
         <addForeignKeyConstraint
                 baseTableName="Seat"
                 baseColumnNames="plane_id"

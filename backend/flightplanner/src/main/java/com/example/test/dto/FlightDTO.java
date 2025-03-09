@@ -9,7 +9,7 @@ import java.time.Instant;
 public class FlightDTO {
     private Integer id;
     private Integer seatId;
-    private Integer plane_id;
+    private Integer planeId;
     private String departure_city;
     private String arrival_city;
     private Instant departOn;
