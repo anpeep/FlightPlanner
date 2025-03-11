@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="1" author="developer">
+
+        <createTable tableName="seat">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="plane_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="available" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+            <column name="row" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="seat_column" type="varchar(1)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createTable tableName="ticket">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="seat_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="flight_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="price" type="float">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="plane">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+        </createTable>
+
+
+        <createTable tableName="flight">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="plane_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="departure_city" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="arrival_city" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="depart_on" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="arrive_on" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="ticket"
+                baseColumnNames="seat_id"
+                referencedTableName="seat"
+                referencedColumnNames="id"
+                constraintName="fk_ticket_seat"/>
+
+        <!-- Foreign key: ticket.flight_id references flight.id -->
+        <addForeignKeyConstraint
+                baseTableName="ticket"
+                baseColumnNames="flight_id"
+                referencedTableName="flight"
+                referencedColumnNames="id"
+                constraintName="fk_ticket_flight"/>
+
+        <!-- Foreign key: seating.plane_id references plane.id -->
+        <addForeignKeyConstraint
+                baseTableName="seat"
+                baseColumnNames="plane_id"
+                referencedTableName="plane"
+                referencedColumnNames="id"
+                constraintName="fk_seat_plane"/>
+
+        <!-- Foreign key: flight.plane_id references plane.id -->
+        <addForeignKeyConstraint
+                baseTableName="flight"
+                baseColumnNames="plane_id"
+                referencedTableName="plane"
+                referencedColumnNames="id"
+                constraintName="fk_flight_plane"/>
+    </changeSet>
+
+</databaseChangeLog>
