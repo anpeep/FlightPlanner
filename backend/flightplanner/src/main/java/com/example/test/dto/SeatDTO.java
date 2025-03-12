@@ -8,6 +8,7 @@ public class SeatDTO {
     private Integer id;
     private Integer planeId;
     private Boolean available;
+    private Boolean recommended;
     private Integer row;
     private String seat_column;
 }

@@ -12,7 +12,6 @@
       <input v-model="arrivalCity" placeholder="Arrival City" />
     </div>
 
-    <!-- Pileti arv koos nuppudega -->
     <div class="input-group">
       <label>Tickets:</label>
       <button @click="decreaseTicketCount">-</button>
@@ -30,13 +29,13 @@
       <li
           v-for="flight in flights"
           :key="flight.id"
-          @click="goToSeatSelection(flight.id)"
+          @click="goToSeatSelection(flight)"
           style="cursor: pointer;"
       >
         <strong>{{ flight.departureCity }} → {{ flight.arrivalCity }}</strong><br />
         🛫 Departure: {{ formatInstant(flight.departOn) }} <br />
         🛬 Arrival: {{ formatInstant(flight.arriveOn) }} <br />
-        ✈️ Plane ID: {{ flight.planeId }} <!-- Display the plane ID -->
+        ✈️ Plane ID: {{ flight.planeId }}
       </li>
     </ul>
   </div>
@@ -61,8 +60,16 @@ export default {
   setup() {
     const router = useRouter();
 
-    const goToSeatSelection = (flightId) => {
-      router.push({ path: '/seat', query: { flightId } });
+    const goToSeatSelection = (flight) => {
+      console.log("Navigating with flightId:", flight.id, "and planeId:", flight.planeId);
+
+      router.push({
+        path: '/seat',
+        query: {
+          flightId: flight.id,
+          planeId: flight.planeId
+        }
+      });
     };
 
     return { goToSeatSelection };
@@ -74,7 +81,6 @@ export default {
       }
 
       try {
-        // Step 1: Fetch flights
         const response = await axios.post("/api/flight/generate", null, {
           params: {
             departureCity: this.departureCity,
@@ -98,10 +104,11 @@ export default {
           this.flightId = this.flights[0].flightId;
 
           // Step 2: Fetch available seats using the flight & plane IDs
-          await axios.post("/api/seats/getAvailableSeats", null, {
+          await axios.post("/api/seats/getSeats", null, {
             params: {
               seatCount: this.ticketCount,
               planeId: this.flights[0].planeId,
+              flightId: this.flightId
             }
           });
         }

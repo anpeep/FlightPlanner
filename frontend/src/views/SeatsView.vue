@@ -35,19 +35,35 @@ export default {
   methods: {
     async loadSeats() {
       try {
-        // Küsi broneeritud kohad serverist
-        const response = await axios.get("/api/seats");
-        this.bookedSeats = response.data;
-        console.log(this.bookedSeats + " booked");
-        // Genereeri kõik toolid ja märgi broneeritud
+        const response = await axios.get("/api/seats/getSeatsByFlight", {
+          params: {
+            flightId: this.$route.query.flightId,
+            planeId: this.$route.query.planeId
+          }
+        });
+
+        // Kontrollige, kui soovitatud kohti pole, määrake kõik toolid mitte-soovitatavateks
+        this.availableSeats = response.data.availableSeats;
+        this.bookedSeats = response.data.bookedSeats;
+        this.recommendedSeats = response.data.recommendedSeats.length ? response.data.recommendedSeats : [];
+
+        console.log("Available Seats: ", this.availableSeats);
+        console.log("Booked Seats: ", this.bookedSeats);
+        console.log("Recommended Seats: ", this.recommendedSeats);
+
+        // Kui soovitatud kohti pole, määrake kõik toolid mitte-soovitatavateks
         this.generateSeats();
       } catch (error) {
-        console.error("Error loading booked seats:", error);
+        console.error("Error loading seats:", error);
       }
     },
-    generateSeats() {
-      const seatMap = new Map(this.bookedSeats.map(seat => [`${seat.row}${seat.seat_column}`, seat.available]));
 
+    generateSeats() {
+      // Loome kaardid broneeritud ja soovitatud toolide jaoks
+      const seatMap = new Map(this.bookedSeats.map(seat => [`${seat.row}${seat.seat_column}`, seat.available]));
+      const recommendedSeatMap = new Map(this.recommendedSeats.map(seat => [`${seat.row}${seat.seat_column}`, true]));
+
+      // Loome toolide jaotuse ridadel
       this.seats = Array.from({length: 11}, (_, index) => {
         const row = index + 1;
         let seatPositions = [];
@@ -62,12 +78,18 @@ export default {
 
         return {
           row,
-          seats: seatPositions.map(pos => ({
-            position: pos,
-            booked: seatMap.has(`${row}${pos}`) ? seatMap.get(`${row}${pos}`) : true // Määrame, kas tool on broneeritud
-          }))
+          seats: seatPositions.map(pos => {
+            const key = `${row}${pos}`;
+            return {
+              position: pos,
+              booked: seatMap.has(key),
+              recommended: recommendedSeatMap.has(key) // Määrame, kas tool on soovitatav
+            };
+          })
         };
       });
+
+      console.log("Generated Seats:", this.seats);
     }
   }
   };

@@ -9,7 +9,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -19,21 +21,31 @@ public class SeatController {
     private final SeatService seatService;
 
 
-    @PostMapping("/getAvailableSeats")
-    public ResponseEntity<List<SeatDTO>> generateBookedSeats(
+    @PostMapping("/getSeats")
+    public ResponseEntity<List<SeatDTO>> getSeats(
         @RequestParam Integer seatCount,
+        @RequestParam Integer planeId,
+        @RequestParam Integer flightId) {
+
+        List<SeatDTO> seats = seatService.generateAndRecommendSeats(seatCount, planeId, flightId);
+        return ResponseEntity.ok(seats);
+    }
+    @GetMapping("/getSeatsByFlight")
+
+    public ResponseEntity<Map<String, List<SeatDTO>>> getSeatsByFlight(
+        @RequestParam Integer flightId,
         @RequestParam Integer planeId) {
-        System.out.println(seatCount);
-        System.out.println(planeId);
 
-        List<SeatDTO> seats = seatService.bookRandomSeats(seatCount, planeId);
-        return new ResponseEntity<>(seats, HttpStatus.OK);
+        List<SeatDTO> allSeats = seatService.getSeatsByFlight(flightId, planeId);
+
+        Map<String, List<SeatDTO>> seatGroups = new HashMap<>();
+        seatGroups.put("availableSeats", allSeats.stream().filter(seat -> seat.getAvailable() && !seat.getRecommended()).toList());
+        seatGroups.put("bookedSeats", allSeats.stream().filter(seat -> !seat.getAvailable() && !seat.getRecommended()).toList());
+        seatGroups.put("recommendedSeats", allSeats.stream().filter(SeatDTO::getRecommended).toList());  // Täiendav kontroll siin!
+
+        return ResponseEntity.ok(seatGroups);
     }
 
 
-    @GetMapping()
-    public ResponseEntity<List<SeatDTO>> getAllSeats() {
-        return ResponseEntity.ok(seatService.getAllSeats());
-    }
 
 }

@@ -17,6 +17,9 @@
             <column name="available" type="boolean">
                 <constraints nullable="false"/>
             </column>
+            <column name="recommended" type="boolean">
+                <constraints nullable="false"/>
+            </column>
             <column name="row" type="int">
                 <constraints nullable="false"/>
             </column>

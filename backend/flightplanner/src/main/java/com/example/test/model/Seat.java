@@ -16,5 +16,6 @@ public class Seat {
     private Plane plane;
     private Boolean available;
     private Integer row;
+    private Boolean recommended;
     private String seat_column;
 }
