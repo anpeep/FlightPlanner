@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DiffGenerationConfig">
+    <option name="sourceModelValue" value="flightplanner:entityManagerFactory" />
+    <option name="targetDbValue" value="e675063a-29da-42dc-a3d2-4e7b81410fa5" />
+    <option name="updateChangeLogPath" value="backend/flightplanner/src/main/resources/db/changelog/changelog-master.xml" />
+    <option name="updateDbConnectionName" value="52075520-c424-4a3f-ac80-c77daf44358d" />
+  </component>
+</project>

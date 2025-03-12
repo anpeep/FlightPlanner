@@ -9,6 +9,7 @@
               :key="seat.column + row.row"
               :number="seat.column + row.row"
               :isBooked="seat.booked"
+              :isRecommended="seat.recommended"
               :classType="seat.type"
           />
         </div>
@@ -26,7 +27,8 @@ export default {
   data() {
     return {
       seats: [], // Toolide andmed
-      bookedSeats: [] // Broneeritud toolid
+      bookedSeats: [], // Broneeritud toolid
+      recommendedSeats: []
     };
   },
   async created() {
@@ -42,16 +44,14 @@ export default {
           }
         });
 
-        // Kontrollige, kui soovitatud kohti pole, määrake kõik toolid mitte-soovitatavateks
         this.availableSeats = response.data.availableSeats;
         this.bookedSeats = response.data.bookedSeats;
-        this.recommendedSeats = response.data.recommendedSeats.length ? response.data.recommendedSeats : [];
+        this.recommendedSeats = response.data.recommendedSeats;
 
         console.log("Available Seats: ", this.availableSeats);
         console.log("Booked Seats: ", this.bookedSeats);
         console.log("Recommended Seats: ", this.recommendedSeats);
 
-        // Kui soovitatud kohti pole, määrake kõik toolid mitte-soovitatavateks
         this.generateSeats();
       } catch (error) {
         console.error("Error loading seats:", error);
@@ -59,14 +59,12 @@ export default {
     },
 
     generateSeats() {
-      // Loome kaardid broneeritud ja soovitatud toolide jaoks
       const seatMap = new Map(this.bookedSeats.map(seat => [`${seat.row}${seat.seat_column}`, seat.available]));
-      const recommendedSeatMap = new Map(this.recommendedSeats.map(seat => [`${seat.row}${seat.seat_column}`, true]));
+      const recommendedSeatMap = new Map(this.recommendedSeats.map(seat => [`${seat.row}${seat.seat_column}`, true])); // Muuda väärtuseks true
 
-      // Loome toolide jaotuse ridadel
       this.seats = Array.from({length: 11}, (_, index) => {
         const row = index + 1;
-        let seatPositions = [];
+        let seatPositions;
 
         if (row === 1) {
           seatPositions = ["1A", "B", "E", "F"];
@@ -83,7 +81,7 @@ export default {
             return {
               position: pos,
               booked: seatMap.has(key),
-              recommended: recommendedSeatMap.has(key) // Määrame, kas tool on soovitatav
+              recommended: recommendedSeatMap.has(key)
             };
           })
         };

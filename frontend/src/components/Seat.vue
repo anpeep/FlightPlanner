@@ -4,7 +4,7 @@
       :alt="number"
       class="seat"
       :class="classType"
-      @click="toggleBooking"
+  @click="toggleBooking"
   />
 </template>
 
