@@ -27,64 +27,60 @@ import java.util.stream.Collectors;
 public class SeatService {
 
     private final SeatRepository seatRepository;
-    private final SeatMapper seatMapper;
     private final PlaneRepository planeRepository;
     private final Random random = new Random();
     public List<SeatDTO> bookRandomSeats(Integer seatCount, Integer planeId) {
         System.out.println("heeee" + planeId);
 
-        // Leia lennuk ID järgi
+        // ✅ Leia lennuk ID järgi
         Plane plane = planeRepository.findById(planeId)
             .orElseThrow(() -> new IllegalArgumentException("Plane not found with ID: " + planeId));
 
-        // Kui toolid puuduvad, loo uued
-        seatRepository.findByPlaneId(planeId);
-        List<Seat> newSeats = new ArrayList<>();
-        int totalRows = 10; // Ridade arv
-        int totalColumns = 6; // Veergude arv
+        // ✅ Kontrolli, kas lennukil on juba toolid andmebaasis
+        if (seatRepository.countByPlaneId(planeId) == 0) {
+            List<Seat> newSeats = new ArrayList<>();
+            int totalRows = 10;
+            int totalColumns = 6;
 
-        for (int row = 1; row <= totalRows; row++) {
-            for (char col = 'A'; col < 'A' + totalColumns; col++) {
-                Seat seat = new Seat();
-                seat.setPlane(plane);  // ✅ Seome lennukiga, mitte ainult ID-ga!
-                seat.setRow(row);
-                seat.setSeat_column(String.valueOf(col));
-                seat.setAvailable(true);
-                newSeats.add(seat);
+            for (int row = 1; row <= totalRows; row++) {
+                for (char col = 'A'; col < 'A' + totalColumns; col++) {
+                    Seat seat = new Seat();
+                    seat.setPlane(plane);
+                    seat.setRow(row);
+                    seat.setSeat_column(String.valueOf(col));
+                    seat.setAvailable(true);
+                    newSeats.add(seat);
+                }
+            }
+            int totalSeats = totalRows * totalColumns;  // Kokku toolide arv
+            int bookedSeatsCount = random.nextInt(totalSeats - seatCount); // Suvaline arv 0 kuni (78 - seatCount)
+
+            // Segame toolid juhuslikult
+            Collections.shuffle(newSeats);
+
+            // Broneerime suvalised toolid
+            for (int i = 0; i < bookedSeatsCount; i++) {
+                newSeats.get(i).setAvailable(false);  // Märgime need toolid broneerituks
             }
 
-
             seatRepository.saveAll(newSeats);
-            System.out.println("Generated seats for plane: " + planeId);
+            System.out.println("Generated and booked " + bookedSeatsCount + " seats for plane: " + planeId);
         }
 
-        // Otsi vabad toolid ainult antud lennuki jaoks
-        List<Seat> availableSeats = seatRepository.findByPlaneId(planeId).stream()
-            .filter(Seat::getAvailable)
-            .sorted(Comparator.comparing(Seat::getRow).thenComparing(Seat::getSeat_column))
-            .collect(Collectors.toList());
+        // ✅ Leia kõik toolid selle lennuki jaoks
+        List<Seat> allSeats = seatRepository.findByPlaneId(planeId);
 
-        if (availableSeats.size() < seatCount) {
-            throw new IllegalArgumentException("Not enough available seats.");
-        }
-
-        // Leia parimad järjestikused toolid
-        List<Seat> bestSeats = findBestAdjacentSeats(availableSeats, seatCount);
-
-        // Märgime toolid broneerituks
-        bestSeats.forEach(seat -> seat.setAvailable(false));
-        seatRepository.saveAll(bestSeats);
-
-        return bestSeats.stream()
+        return allSeats.stream()
             .map(seat -> SeatDTO.builder()
                 .id(seat.getId())
                 .row(seat.getRow())
-                .planeId(seat.getPlane().getId()) // ✅ Nüüd ei ole NULL!
+                .planeId(seat.getPlane().getId())
                 .seat_column(seat.getSeat_column())
                 .available(seat.getAvailable())
                 .build())
             .collect(Collectors.toList());
     }
+
 
 
     private List<Seat> findBestAdjacentSeats(List<Seat> availableSeats, int seatCount) {
