@@ -9,10 +9,13 @@ import lombok.Setter;
 @Table(name = "seat")
 public class Seat {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)  // Add this line to auto-generate the ID
+    private Integer id;
     @ManyToOne
     @JoinColumn(name = "plane_id")
     private Plane plane;
     private Boolean available;
+    private Integer row;
+    private Boolean recommended;
+    private String seat_column;
 }

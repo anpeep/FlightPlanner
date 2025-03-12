@@ -1,30 +1,16 @@
 <template>
   <div class="seating-view">
     <SidePanel />
-
     <div class="seating">
       <div v-for="row in seats" :key="row.row" class="row">
         <div class="seat-group">
           <Seat
-              v-for="seat in row.seats.filter(s => ['A', 'B', 'C'].includes(s.position))"
-              :key="seat.position + row.row"
-              :number="seat.position + row.row"
+              v-for="seat in row.seats"
+              :key="seat.column + row.row"
+              :number="seat.column + row.row"
               :isBooked="seat.booked"
-              :classType="seat.class"
-              @toggle="toggleSeat(row.row, seat.position)"
-          />
-        </div>
-
-        <div class="aisle"></div>
-
-        <div class="seat-group">
-          <Seat
-              v-for="seat in row.seats.filter(s => ['D', 'F', 'G'].includes(s.position))"
-              :key="seat.position + row.row"
-              :number="seat.position + row.row"
-              :isBooked="seat.booked"
-              :classType="seat.class"
-              @toggle="toggleSeat(row.row, seat.position)"
+              :isRecommended="seat.recommended"
+              :classType="seat.type"
           />
         </div>
       </div>
@@ -33,50 +19,75 @@
 </template>
 
 <script>
+import axios from "axios";
 import Seat from "@/components/Seat.vue";
 import SidePanel from "@/components/SidePanel.vue";
-
 export default {
   components: { Seat, SidePanel },
   data() {
     return {
-      seats: Array.from({ length: 17 }, (_, index) => {
+      seats: [], // Toolide andmed
+      bookedSeats: [], // Broneeritud toolid
+      recommendedSeats: []
+    };
+  },
+  async created() {
+    await this.loadSeats();
+  },
+  methods: {
+    async loadSeats() {
+      try {
+        const response = await axios.get("/api/seats/getSeatsByFlight", {
+          params: {
+            flightId: this.$route.query.flightId,
+            planeId: this.$route.query.planeId
+          }
+        });
+
+        this.availableSeats = response.data.availableSeats;
+        this.bookedSeats = response.data.bookedSeats;
+        this.recommendedSeats = response.data.recommendedSeats;
+
+        console.log("Available Seats: ", this.availableSeats);
+        console.log("Booked Seats: ", this.bookedSeats);
+        console.log("Recommended Seats: ", this.recommendedSeats);
+
+        this.generateSeats();
+      } catch (error) {
+        console.error("Error loading seats:", error);
+      }
+    },
+    generateSeats() {
+      const seatMap = new Map(this.bookedSeats.map(seat => [`${seat.row}${seat.seat_column}`, seat.available]));
+      const recommendedSeatMap = new Map(this.recommendedSeats.map(seat => [`${seat.row}${seat.seat_column}`, true])); // Muuda väärtuseks true
+
+      this.seats = Array.from({length: 11}, (_, index) => {
         const row = index + 1;
-        const isBusiness = row <= 5;
-        const isTail = row > 15;
+        let seatPositions;
+
+        if (row === 1) {
+          seatPositions = ["1A", "B", "E", "F"];
+        } else if (row === 5 || row === 11) {
+          seatPositions = ["A", "F"];
+        } else {
+          seatPositions = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        }
 
         return {
           row,
-          seats: isTail
-              ? [ "A", "C", "D", "F" ].map(pos => ({
-                position: pos,
-                class: "economy",
-                booked: false
-              }))
-              : [ "A", "B", "C", "D", "F", "G" ].map(pos => ({
-                position: pos,
-                class: isBusiness ? "business" : "economy",
-                booked: false
-              }))
+          seats: seatPositions.map(pos => {
+            const key = `${row}${pos}`;
+            return {
+              position: pos,
+              booked: seatMap.has(key),
+              recommended: recommendedSeatMap.has(key)
+            };
+          })
         };
-      })
-    };
-  },
-  methods: {
-    toggleSeat(rowNumber, position) {
-      this.seats = this.seats.map(row => {
-        if (row.row === rowNumber) {
-          return {
-            ...row,
-            seats: row.seats.map(seat =>
-                seat.position === position ? { ...seat, booked: !seat.booked } : seat
-            )
-          };
-        }
-        return row;
       });
+
+      console.log("Generated Seats:", this.seats);
     }
   }
-};
+  };
 </script>
-

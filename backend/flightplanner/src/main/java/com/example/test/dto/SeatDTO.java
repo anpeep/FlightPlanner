@@ -5,7 +5,10 @@ import lombok.Data;
 @Data
 @Builder
 public class SeatDTO {
-    private String id;
+    private Integer id;
     private Integer planeId;
     private Boolean available;
+    private Boolean recommended;
+    private Integer row;
+    private String seat_column;
 }

@@ -1,5 +1,6 @@
 package com.example.test.service;
 
+import com.example.test.dto.FlightDTO;
 import com.example.test.dto.PlaneDTO;
 import com.example.test.mapping.PlaneMapper;
 import com.example.test.model.Plane;
@@ -8,15 +9,36 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class PlaneService {
+
     private final PlaneRepository planeRepository;
-    private final PlaneMapper planeMapper;
-    public List<PlaneDTO> getAllPlanes() {
-        return planeRepository.findAll().stream().map(planeMapper::toDTO).collect(Collectors.toList());
+
+    public PlaneDTO getFlightsForPlane(Integer planeId) {
+        // Fetch the plane from the repository
+        Plane plane = planeRepository.findById(planeId)
+            .orElseThrow(() -> new NoSuchElementException("Plane not found with ID: " + planeId));
+
+        // Manually map the Plane entity to PlaneDTO
+        // Assuming planeId is a property of flight
+
+        return PlaneDTO.builder()
+            .id(plane.getId())
+            .flights(plane.getFlights().stream()
+                .map(flight -> FlightDTO.builder()
+                    .id(flight.getId())
+                    .departureCity(flight.getDepartureCity())
+                    .arrivalCity(flight.getArrivalCity())
+                    .departOn(flight.getDepartOn())
+                    .arriveOn(flight.getArriveOn())
+                    .planeId(flight.getPlane().getId()) // Assuming planeId is a property of flight
+                    .build())
+                .collect(Collectors.toList()))
+            .build();
     }
 }

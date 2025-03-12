@@ -1,9 +1,6 @@
 package com.example.test.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,8 +12,10 @@ import java.util.List;
 @Table(name = "plane")
 
 public class Plane {
+
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Make sure this is present
     @Id
     private Integer id;
-    @OneToMany
+    @OneToMany(mappedBy = "plane", cascade = CascadeType.ALL) // Seome lennud automaatselt
     private List<Flight> flights;
 }

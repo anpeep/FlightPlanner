@@ -6,11 +6,32 @@
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
     <changeSet id="1" author="developer">
-        <createTable tableName="Ticket">
+
+        <createTable tableName="seat">
             <column name="id" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="seat_string" type="varchar(3)">
+            <column name="plane_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="available" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+            <column name="recommended" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+            <column name="row" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="seat_column" type="varchar(1)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createTable tableName="ticket">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="seat_id" type="int">
                 <constraints nullable="false"/>
             </column>
             <column name="flight_id" type="int">
@@ -21,25 +42,14 @@
             </column>
         </createTable>
 
-        <createTable tableName="Plane">
+        <createTable tableName="plane">
             <column name="id" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
         </createTable>
 
-        <createTable tableName="Seat">
-            <column name="id" type="varchar(3)">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-            <column name="plane_id" type="int">
-                <constraints nullable="false"/>
-            </column>
-            <column name="available" type="boolean">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
 
-        <createTable tableName="Flight">
+        <createTable tableName="flight">
             <column name="id" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
@@ -59,35 +69,35 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
-        <!-- Foreign key: Ticket.seat_string references Seating.id -->
+
         <addForeignKeyConstraint
-                baseTableName="Ticket"
-                baseColumnNames="seat_string"
-                referencedTableName="Seat"
+                baseTableName="ticket"
+                baseColumnNames="seat_id"
+                referencedTableName="seat"
                 referencedColumnNames="id"
                 constraintName="fk_ticket_seat"/>
 
-        <!-- Foreign key: Ticket.flight_id references Flight.id -->
+        <!-- Foreign key: ticket.flight_id references flight.id -->
         <addForeignKeyConstraint
-                baseTableName="Ticket"
+                baseTableName="ticket"
                 baseColumnNames="flight_id"
-                referencedTableName="Flight"
+                referencedTableName="flight"
                 referencedColumnNames="id"
                 constraintName="fk_ticket_flight"/>
 
-        <!-- Foreign key: Seating.plane_id references Plane.id -->
+        <!-- Foreign key: seating.plane_id references plane.id -->
         <addForeignKeyConstraint
-                baseTableName="Seat"
+                baseTableName="seat"
                 baseColumnNames="plane_id"
-                referencedTableName="Plane"
+                referencedTableName="plane"
                 referencedColumnNames="id"
                 constraintName="fk_seat_plane"/>
 
-        <!-- Foreign key: Flight.plane_id references Plane.id -->
+        <!-- Foreign key: flight.plane_id references plane.id -->
         <addForeignKeyConstraint
-                baseTableName="Flight"
+                baseTableName="flight"
                 baseColumnNames="plane_id"
-                referencedTableName="Plane"
+                referencedTableName="plane"
                 referencedColumnNames="id"
                 constraintName="fk_flight_plane"/>
     </changeSet>

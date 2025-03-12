@@ -9,37 +9,43 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RequiredArgsConstructor
-@RequestMapping("seat/")
+@RequestMapping("/api/seats")
 @RestController
 public class SeatController {
     private final SeatService seatService;
-    @PostConstruct
-        public void init() {
-        seatService.init();
-    }
-    @PostMapping("search")
-    public ResponseEntity<List<SeatDTO>> findSeats(
-        @RequestParam Integer planeId,
+
+
+    @PostMapping("/getSeats")
+    public ResponseEntity<List<SeatDTO>> getSeats(
         @RequestParam Integer seatCount,
-        @RequestParam(defaultValue = "NONE") SeatFilter seatFilter) {
-        List<SeatDTO> seats = seatService.findAvailableSeats(planeId, seatCount, seatFilter);
-        return new ResponseEntity<>(seats, HttpStatus.OK);
-    }
-    @PutMapping("filter")
-    public ResponseEntity<List<SeatDTO>> findFilteredSeats(
         @RequestParam Integer planeId,
-        @RequestParam Integer seatCount,
-        @RequestParam SeatFilter seatFilter) {
-        List<SeatDTO> seats = seatService.findAvailableSeats(planeId, seatCount, seatFilter);
-        return new ResponseEntity<>(seats, HttpStatus.OK);
+        @RequestParam Integer flightId) {
+
+        List<SeatDTO> seats = seatService.generateAndRecommendSeats(seatCount, planeId, flightId);
+        return ResponseEntity.ok(seats);
     }
-    @PostMapping("book")
-    public ResponseEntity<String> bookSeats(@RequestBody List<Integer> seatIds) {
-        seatService.bookSeats(seatIds);
-        return new ResponseEntity<>("Seats booked successfully!", HttpStatus.OK);
+    @GetMapping("/getSeatsByFlight")
+
+    public ResponseEntity<Map<String, List<SeatDTO>>> getSeatsByFlight(
+        @RequestParam Integer flightId,
+        @RequestParam Integer planeId) {
+
+        List<SeatDTO> allSeats = seatService.getSeatsByFlight(flightId, planeId);
+
+        Map<String, List<SeatDTO>> seatGroups = new HashMap<>();
+        seatGroups.put("availableSeats", allSeats.stream().filter(seat -> seat.getAvailable() && !seat.getRecommended()).toList());
+        seatGroups.put("bookedSeats", allSeats.stream().filter(seat -> !seat.getAvailable() && !seat.getRecommended()).toList());
+        seatGroups.put("recommendedSeats", allSeats.stream().filter(SeatDTO::getRecommended).toList());  // Täiendav kontroll siin!
+
+        return ResponseEntity.ok(seatGroups);
     }
+
+
+
 }

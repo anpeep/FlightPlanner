@@ -10,9 +10,10 @@ import lombok.Setter;
 @Table(name = "ticket")
 public class Ticket {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)  // Add this line to auto-generate the ID
     private Integer id;
     @ManyToOne
-    @JoinColumn(name = "seat_string")
+    @JoinColumn(name = "seat_id")
     private Seat seat;
     @ManyToOne
     @JoinColumn(name = "flight_id")
