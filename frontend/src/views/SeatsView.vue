@@ -57,7 +57,6 @@ export default {
         console.error("Error loading seats:", error);
       }
     },
-
     generateSeats() {
       const seatMap = new Map(this.bookedSeats.map(seat => [`${seat.row}${seat.seat_column}`, seat.available]));
       const recommendedSeatMap = new Map(this.recommendedSeats.map(seat => [`${seat.row}${seat.seat_column}`, true])); // Muuda väärtuseks true
