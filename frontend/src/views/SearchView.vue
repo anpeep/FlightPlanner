@@ -33,7 +33,7 @@
           @click="goToSeatSelection(flight.id)"
           style="cursor: pointer;"
       >
-        <strong>{{ flight.departure_city }} → {{ flight.arrival_city }}</strong><br />
+        <strong>{{ flight.departureCity }} → {{ flight.arrivalCity }}</strong><br />
         🛫 Departure: {{ formatInstant(flight.departOn) }} <br />
         🛬 Arrival: {{ formatInstant(flight.arriveOn) }} <br />
         ✈️ Plane ID: {{ flight.planeId }} <!-- Display the plane ID -->
@@ -52,10 +52,10 @@ export default {
       departureCity: "",
       arrivalCity: "",
       selectedDate: "",
-      ticketCount: 1, // Vaikimisi 1 pilet
+      ticketCount: 1,
       flights: [],
-      planeId: "",
       flightId: "",
+      planeId: "",
     };
   },
   setup() {
@@ -79,48 +79,35 @@ export default {
           params: {
             departureCity: this.departureCity,
             arrivalCity: this.arrivalCity,
-            date: this.selectedDate
+            date: this.selectedDate,
           }
         });
+        console.log(response.data)
 
         this.flights = response.data.map(flight => ({
+          planeId: flight.planeId,
           ...flight,
-          flightId: flight.id,  // Assign flightId
-          planeId: flight.planeId // Assign planeId
+          flightId: flight.id,
         }));
+
+        console.log(this.flights[0].planeId + " stuff");
+
 
         if (this.flights.length > 0) {
           // Use the first flight for now (modify as needed)
           this.flightId = this.flights[0].flightId;
-          this.planeId = this.flights[0].planeId;
 
           // Step 2: Fetch available seats using the flight & plane IDs
           await axios.post("/api/seats/getAvailableSeats", null, {
             params: {
               seatCount: this.ticketCount,
-              flightId: this.flightId,
-              planeId: this.planeId
+              planeId: this.flights[0].planeId,
             }
           });
         }
       } catch (error) {
         console.error("Error fetching flights:", error);
 
-
-    // Fetch flights for a specific plane (use planeId if available, else fetch flights normally)
-        const response = await axios.post("/api/flight/generate", null, {
-          params: {
-            departureCity: this.departureCity,
-            arrivalCity: this.arrivalCity,
-            date: this.selectedDate
-          }
-        });
-
-        // After fetching flights, associate them with the correct plane
-        this.flights = response.data.map(flight => ({
-          ...flight,
-          planeId: flight.planeId
-        }));
       }
     },
 
@@ -135,7 +122,6 @@ export default {
     },
 
     formatInstant(instant) {
-      if (!instant) return "N/A";
       return new Date(instant).toLocaleString("et-EE", {
         weekday: "long",
         year: "numeric",

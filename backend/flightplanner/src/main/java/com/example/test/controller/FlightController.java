@@ -12,11 +12,8 @@ import java.util.List;
 
 @RequestMapping("/api/flight")
 @RestController
+@RequiredArgsConstructor
 public class FlightController {
-    public FlightController(FlightService flightService) {
-        this.flightService = flightService;
-    }
-
     private final FlightService flightService;
 
 //    @GetMapping("/all")

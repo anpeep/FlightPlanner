@@ -39,6 +39,7 @@ export default {
         // Küsi broneeritud kohad serverist
         const response = await axios.get("/api/seats");
         this.bookedSeats = response.data;
+        console.log(this.bookedSeats);
         // Genereeri kõik istmed ja märgi broneeritud
         this.generateSeats();
       } catch (error) {

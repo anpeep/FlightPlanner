@@ -27,21 +27,39 @@ import java.util.stream.Collectors;
 public class SeatService {
 
     private final SeatRepository seatRepository;
+    private final SeatMapper seatMapper;
     private final PlaneRepository planeRepository;
     private final Random random = new Random();
-    public List<SeatDTO> bookRandomSeats(int seatCount, int flightId, int planeId) {
-        // Find the plane using planeId
-        Optional<Plane> planeOptional = planeRepository.findById(planeId);
-        if (planeOptional.isEmpty()) {
-            throw new IllegalArgumentException("Plane not found");
+    public List<SeatDTO> bookRandomSeats(Integer seatCount, Integer planeId) {
+        System.out.println("heeee" + planeId);
+
+        // Leia lennuk ID järgi
+        Plane plane = planeRepository.findById(planeId)
+            .orElseThrow(() -> new IllegalArgumentException("Plane not found with ID: " + planeId));
+
+        // Kui toolid puuduvad, loo uued
+        seatRepository.findByPlaneId(planeId);
+        List<Seat> newSeats = new ArrayList<>();
+        int totalRows = 10; // Ridade arv
+        int totalColumns = 6; // Veergude arv
+
+        for (int row = 1; row <= totalRows; row++) {
+            for (char col = 'A'; col < 'A' + totalColumns; col++) {
+                Seat seat = new Seat();
+                seat.setPlane(plane);  // ✅ Seome lennukiga, mitte ainult ID-ga!
+                seat.setRow(row);
+                seat.setSeat_column(String.valueOf(col));
+                seat.setAvailable(true);
+                newSeats.add(seat);
+            }
+
+
+            seatRepository.saveAll(newSeats);
+            System.out.println("Generated seats for plane: " + planeId);
         }
-        Plane plane = planeOptional.get();
 
-        // Retrieve seats related to the flight and plane
-        List<Seat> allSeats = seatRepository.findByPlaneId(planeId);
-
-        // Filter available seats
-        List<Seat> availableSeats = allSeats.stream()
+        // Otsi vabad toolid ainult antud lennuki jaoks
+        List<Seat> availableSeats = seatRepository.findByPlaneId(planeId).stream()
             .filter(Seat::getAvailable)
             .sorted(Comparator.comparing(Seat::getRow).thenComparing(Seat::getSeat_column))
             .collect(Collectors.toList());
@@ -50,17 +68,18 @@ public class SeatService {
             throw new IllegalArgumentException("Not enough available seats.");
         }
 
+        // Leia parimad järjestikused toolid
         List<Seat> bestSeats = findBestAdjacentSeats(availableSeats, seatCount);
 
-        // Mark seats as booked
+        // Märgime toolid broneerituks
         bestSeats.forEach(seat -> seat.setAvailable(false));
         seatRepository.saveAll(bestSeats);
 
         return bestSeats.stream()
             .map(seat -> SeatDTO.builder()
-                .row(seat.getRow())
                 .id(seat.getId())
-                .planeId(seat.getPlane().getId())
+                .row(seat.getRow())
+                .planeId(seat.getPlane().getId()) // ✅ Nüüd ei ole NULL!
                 .seat_column(seat.getSeat_column())
                 .available(seat.getAvailable())
                 .build())
@@ -91,7 +110,8 @@ public class SeatService {
             Math.abs(seat1.getSeat_column().charAt(0) - seat2.getSeat_column().charAt(0)) == 1;
     }
     public List<SeatDTO> getAllSeats() {
+        System.out.println("honey im home");
         return seatRepository.findAll().stream()
-            .map(seat -> SeatDTO.builder().row(seat.getRow()).id(seat.getId()).planeId(seat.getId()).seat_column(seat.getSeat_column()).row(seat.getRow()).available(seat.getAvailable()).build()).toList();
+            .map(seat -> SeatDTO.builder().row(seat.getRow()).id(seat.getId()).planeId(seat.getPlane().getId()).seat_column(seat.getSeat_column()).row(seat.getRow()).available(seat.getAvailable()).build()).toList();
     }
 }

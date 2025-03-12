@@ -16,6 +16,6 @@ public class Plane {
     @GeneratedValue(strategy = GenerationType.IDENTITY) // Make sure this is present
     @Id
     private Integer id;
-    @OneToMany(mappedBy = "plane")  // Use 'mappedBy' to indicate the owning side of the relationship
+    @OneToMany(mappedBy = "plane", cascade = CascadeType.ALL) // Seome lennud automaatselt
     private List<Flight> flights;
 }

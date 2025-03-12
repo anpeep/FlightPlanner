@@ -17,14 +17,17 @@ import java.util.Optional;
 @RestController
 public class SeatController {
     private final SeatService seatService;
+
+
     @PostMapping("/getAvailableSeats")
     public ResponseEntity<List<SeatDTO>> generateBookedSeats(
         @RequestParam Integer seatCount,
-        @RequestParam Integer flightId,
         @RequestParam Integer planeId) {
+        System.out.println(seatCount);
+        System.out.println(planeId);
 
-        List<SeatDTO> seats = seatService.bookRandomSeats(seatCount, flightId, planeId);
-        return ResponseEntity.ok(seats);
+        List<SeatDTO> seats = seatService.bookRandomSeats(seatCount, planeId);
+        return new ResponseEntity<>(seats, HttpStatus.OK);
     }
 
 
