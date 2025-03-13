@@ -4,7 +4,10 @@
       :alt="number"
       class="seat"
       :class="classType"
-  @click="toggleBooking"
+      :draggable="isRecommended"
+  @dragstart="dragStart"
+  @dragover.prevent
+  @drop="drop"
   />
 </template>
 
@@ -15,18 +18,32 @@ import seatRecommendImage from "@/assets/seat-recommend.png";
 
 export default {
   props: ["number", "isBooked", "isRecommended", "classType"],
+  methods: {
+    dragStart(event) {
+      if (!this.isRecommended) {
+        console.log(`❌ Dragging not allowed: ${this.number} is not recommended.`);
+        return;
+      }
+
+      console.log(`Dragging seat: ${this.number}, Recommended: ${this.isRecommended}`);
+
+      event.dataTransfer.setData("seat", JSON.stringify({
+        number: this.number,
+        isRecommended: this.isRecommended
+      }));
+    },
+    drop(event) {
+      const droppedSeat = JSON.parse(event.dataTransfer.getData("seat"));
+
+      if (droppedSeat.number === this.number) return; // Väldi enda peale lohistamist
+
+      console.log(`Swapping seat ${droppedSeat.number} with ${this.number}`);
+      this.$emit("swapSeats", droppedSeat.number, this.number);
+    }
+  },
   computed: {
     getSeatImage() {
-      console.log("isRecommended:", this.isRecommended);  // Logi väärtus
-      if (this.isRecommended) {
-        return seatRecommendImage; // Ainult 1 PNG recommended seat'idele
-      }
-      return this.isBooked ? seatBookedImage : seatImage; // Kasutab õigeid pilte
-    }
-},
-  methods: {
-    toggleBooking() {
-      this.$emit("toggle");
+      return this.isRecommended ? seatRecommendImage : this.isBooked ? seatBookedImage : seatImage;
     }
   }
 };
