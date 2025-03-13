@@ -17,12 +17,8 @@ public class PlaneService {
     private final PlaneRepository planeRepository;
 
     public PlaneDTO getFlightsForPlane(Integer planeId) {
-        // Fetch the plane from the repository
         Plane plane = planeRepository.findById(planeId)
             .orElseThrow(() -> new NoSuchElementException("Plane not found with ID: " + planeId));
-
-        // Manually map the Plane entity to PlaneDTO
-        // Assuming planeId is a property of flight
 
         return PlaneDTO.builder()
             .id(plane.getId())

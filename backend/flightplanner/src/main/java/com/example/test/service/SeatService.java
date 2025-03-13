@@ -1,6 +1,5 @@
 package com.example.test.service;
 
-import com.example.test.assets.SeatFilter;
 import com.example.test.dto.SeatDTO;
 import com.example.test.model.Plane;
 import com.example.test.model.Seat;
@@ -12,7 +11,6 @@ import com.example.test.repository.TicketRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 @Service
@@ -59,7 +57,7 @@ public class SeatService {
             int bookedSeatsCount = random.nextInt(totalSeats - seatCount);
             Collections.shuffle(newSeats);
 
-            for (int i = 0; i < bookedSeatsCount; i++) {
+            for (int i = 0; i < bookedSeatsCount + 1; i++) {
                 newSeats.get(i).setAvailable(false);
             }
 
@@ -177,20 +175,34 @@ public class SeatService {
 
     public List<Seat> applyFiltersAndRecommendSeats(Integer planeId, Integer flightId, List<Integer> filters) {
         List<Seat> allSeats = seatRepository.findByPlaneId(planeId);
+        List<Seat> availableSeats = allSeats.stream().filter(Seat::getAvailable).collect(Collectors.toList());  // Saadaval olevad toolid
 
         // Rakendame valitud filtreid
         allSeats.stream().filter(Seat::getAvailable).forEach(seat -> {
 
-            // Eemaldame soovituse, kui tool ei vasta filtritele
+            boolean matchesAllFilters = true; // Alustame tõene kõikide filtrite jaoks
+
+            // Akna tooli filter
             if (filters.contains(1) && !seat.getSeat_column().equals("A") && !seat.getSeat_column().equals("F")) {
-                seat.setRecommended(false); // Akna tooli filter
+                matchesAllFilters = false;
+                seat.setRecommended(false); // Eemaldame soovituse
             }
+
+            // Väljapääsu filter
             if (filters.contains(2) && (seat.getRow() != 10 && seat.getRow() != 5)) {
-                seat.setRecommended(false); // Väljapääsu filter
+                matchesAllFilters = false;
+                seat.setRecommended(false); // Eemaldame soovituse
             }
+
+            // Väljapääsu ja akna toolide ristmik
             if (filters.contains(3) && !(seat.getRow() == 10 || seat.getRow() == 5) &&
                 !(seat.getSeat_column().equals("A") || seat.getSeat_column().equals("F"))) {
-                seat.setRecommended(false); // Väljapääsu ja akna toolide ristmik
+                matchesAllFilters = false;
+                seat.setRecommended(false); // Eemaldame soovituse
+            }
+            // Kui kõik filtrid sobivad, siis lubame tooli soovituse
+            if (matchesAllFilters) {
+                seat.setRecommended(true);  // Soovitage tool
             }
         });
 

@@ -1,20 +1,14 @@
 package com.example.test.controller;
 
-import com.example.test.assets.SeatFilter;
 import com.example.test.dto.SeatDTO;
 import com.example.test.model.Seat;
 import com.example.test.repository.SeatRepository;
-import com.example.test.service.SeatLoader;
 import com.example.test.service.SeatService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @RequiredArgsConstructor
 @RequestMapping("/api/seats")
@@ -84,8 +78,8 @@ public class SeatController {
                     matchesAllFilters &= (exitRows.contains(String.valueOf(seat.getRow())) &&
                         (seat.getSeat_column().equals("A") || seat.getSeat_column().equals("H")));
                 }
-                if (filters.contains(4)) {
-                    matchesAllFilters &= isNear(seat, availableSeats);
+                if (filters.contains(4) && availableSeats.size() > 1) {
+                    matchesAllFilters &= isNear(seat, availableSeats, seatCount);
                 }
                 return matchesAllFilters;
             })
@@ -95,6 +89,27 @@ public class SeatController {
         if (!filteredSeats.isEmpty()) {
             filteredSeats.forEach(seat -> seat.setRecommended(true));
         }
+
+        // Kui ei ole piisavalt filtreeritud kohti, siis täiendame suvaliste toolidega
+// 4️⃣ Kui ei ole piisavalt filtreeritud kohti, siis täiendame suvaliste toolidega
+        if (filteredSeats.size() < seatCount) {
+            int remainingSeatsCount = seatCount - filteredSeats.size();
+
+            // Vali suvaliselt vabad toolid
+            List<Seat> remainingSeats = availableSeats.stream()
+                .limit(remainingSeatsCount)
+                    .toList();
+            // Märgi need toolid soovitatuks
+            remainingSeats.forEach(seat -> seat.setRecommended(true));
+
+            // Loo uus list, mis sisaldab nii filtreeritud kui ka suvalisi kohti
+            List<Seat> updatedFilteredSeats = new ArrayList<>(filteredSeats);
+            updatedFilteredSeats.addAll(remainingSeats); // Lisa suvalised toolid
+
+            // Kasuta uut updatedFilteredSeats listi edasistes toimingutes
+            filteredSeats = updatedFilteredSeats;
+        }
+
 
         // 4️⃣ SALVESTA UUENDATUD TOOLID
         seatRepository.saveAll(allSeats);
@@ -107,12 +122,43 @@ public class SeatController {
                 .planeId(planeId)
                 .seat_column(seat.getSeat_column())
                 .recommended(true)
-                .available(false)
+                .available(true)
                 .build())
             .limit(seatCount) // Võtame ainult seatCount arv toole
             .toList();
 
         return ResponseEntity.ok(seatDTOs);
+    }
+
+    private boolean isNear(Seat currentSeat, List<Seat> availableSeats, Integer seatCount) {
+        // Kui seatCount on suurem kui 1, proovime leida järjestatud kohti
+        if (seatCount > 1) {
+            // Kogume kõik toolid, mis on samas reas ja järjestatud
+            List<Seat> nearbySeats = availableSeats.stream()
+                .filter(seat -> seat.getRow().equals(currentSeat.getRow()))
+                .sorted(Comparator.comparing(seat -> seat.getSeat_column().charAt(0)))  // Sorteerime toolid samas reas
+                .toList();
+
+            // Leiame järjestatud toolid, mis on üksteise kõrval
+            for (int i = 0; i < nearbySeats.size() - seatCount + 1; i++) {
+                List<Seat> possibleSeats = nearbySeats.subList(i, i + seatCount);  // Kontrollime järgmise seatCount arvu järjestatud kohti
+                boolean areSeatsAdjacent = true;
+
+                // Kontrollime, kas need toolid on üksteise kõrval
+                for (int j = 0; j < possibleSeats.size() - 1; j++) {
+                    if (Math.abs(possibleSeats.get(j).getSeat_column().charAt(0) - possibleSeats.get(j + 1).getSeat_column().charAt(0)) != 1) {
+                        areSeatsAdjacent = false;
+                        break;
+                    }
+                }
+
+                if (areSeatsAdjacent) {
+                    // Kui need toolid on üksteise kõrval, siis tagastame tõene
+                    return true;
+                }
+            }
+         }
+        return false;
     }
 
 
@@ -146,20 +192,7 @@ public class SeatController {
 
         return ResponseEntity.ok(seatDTOs);
     }
-    private boolean isNear(Seat currentSeat, List<Seat> availableSeats) {
-        // Kogume kõik toolid, mis on samas reas või järgmistes ridades
-        List<Seat> nearbySeats = availableSeats.stream()
-            .filter(seat ->
-                seat.getRow().equals(currentSeat.getRow()) ||
-                    Math.abs((seat.getRow()) - (currentSeat.getRow())) == 1) // Samas reas või järgmises reas
-            .toList();
 
-        // Kontrollige, kas vähemalt üks tool on järgmises reas ja see on samasugune või erinev positsioonil
-        return nearbySeats.stream()
-            .anyMatch(seat ->
-                Math.abs(seat.getSeat_column().charAt(0) - currentSeat.getSeat_column().charAt(0)) <= 1 // Toolid on üksteisele lähedal
-            );
-    }
 
 
 }
