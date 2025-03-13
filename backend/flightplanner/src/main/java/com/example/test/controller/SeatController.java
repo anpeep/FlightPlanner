@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,6 @@ public class SeatController {
         return ResponseEntity.ok(seats);
     }
     @GetMapping("/getSeatsByFlight")
-
     public ResponseEntity<Map<String, List<SeatDTO>>> getSeatsByFlight(
         @RequestParam Integer flightId,
         @RequestParam Integer planeId) {
@@ -45,7 +45,20 @@ public class SeatController {
 
         return ResponseEntity.ok(seatGroups);
     }
-
+    @PostMapping("/filters")
+    public ResponseEntity<List<SeatDTO>> getFilteredSeats(
+        @RequestParam Integer flightId,
+        @RequestParam Integer planeId,
+        @RequestParam List<SeatFilter> filters) {
+        System.out.println(filters);
+        try {
+            List<SeatDTO> filteredSeats = seatService.getSeatsWithFilters(flightId, planeId, filters);
+            System.out.println(filteredSeats);
+            return ResponseEntity.ok(filteredSeats);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
 
 
 }

@@ -39,115 +39,6 @@ public class SeatService {
     private final TicketRepository ticketRepository;
     private final FlightRepository flightRepository;
     private final Random random = new Random();
-    public List<SeatDTO> bookRandomSeats(Integer seatCount, Integer planeId) {
-        Plane plane = planeRepository.findById(planeId)
-            .orElseThrow(() -> new IllegalArgumentException("Plane not found with ID: " + planeId));
-
-        if (seatRepository.countByPlaneId(planeId) == 0) {
-            List<Seat> newSeats = new ArrayList<>();
-            int totalRows = 10;
-            int totalColumns = 6;
-
-            for (int row = 1; row <= totalRows; row++) {
-                for (char col = 'A'; col < 'A' + totalColumns; col++) {
-                    Seat seat = new Seat();
-                    seat.setPlane(plane);
-                    seat.setRow(row);
-                    seat.setRecommended(false);
-                    seat.setSeat_column(String.valueOf(col));
-                    seat.setAvailable(true);
-                    newSeats.add(seat);
-                }
-            }
-            int totalSeats = totalRows * totalColumns;
-            int bookedSeatsCount = random.nextInt(totalSeats - seatCount);
-            Collections.shuffle(newSeats);
-
-            for (int i = 0; i < bookedSeatsCount; i++) {
-                newSeats.get(i).setAvailable(false);
-            }
-            seatRepository.saveAll(newSeats);
-        }
-        List<Seat> allSeats = seatRepository.findByPlaneId(planeId);
-
-        return allSeats.stream()
-            .map(seat -> SeatDTO.builder()
-                .id(seat.getId())
-                .row(seat.getRow())
-                .planeId(seat.getPlane().getId())
-                .recommended(false)
-                .seat_column(seat.getSeat_column())
-                .available(seat.getAvailable())
-                .build())
-            .collect(Collectors.toList());
-    }
-
-    public List<SeatDTO> recommendSeats(Integer seatCount, Integer flightId) {
-        List<Seat> availableSeats = seatRepository.findAll().stream()
-            .filter(Seat::getAvailable)
-            .toList();
-
-        List<Seat> bookedSeats = seatRepository.findAll().stream()
-            .filter(seat -> !seat.getAvailable())
-            .toList();
-
-        List<Seat> recommendedSeats = new ArrayList<>();
-
-        List<Ticket> recommendTickets = new ArrayList<>();
-        for (int i = 0; i < seatCount; i++) {
-            Seat seat = availableSeats.get(i);
-            seat.setRecommended(false);
-            seat.setAvailable(true);
-            recommendedSeats.add(seat);
-
-            Ticket ticketDTO = new Ticket();
-            ticketDTO.setSeat(seat);
-            ticketDTO.setFlight(flightRepository.findById(flightId).orElseThrow());
-            ticketDTO.setPrice(random.nextFloat() * 100);
-            recommendTickets.add(ticketDTO);
-        }
-        ticketRepository.saveAll(recommendTickets);
-        seatRepository.saveAll(recommendedSeats);
-
-        List<SeatDTO> seatDTOs = new ArrayList<>();
-
-        // Lisa saadaval olevad toolid (available)
-        seatDTOs.addAll(availableSeats.stream()
-            .map(seat -> SeatDTO.builder()
-                .id(seat.getId())
-                .row(seat.getRow())
-                .planeId(seat.getPlane().getId())
-                .seat_column(seat.getSeat_column())
-                .recommended(false)
-                .available(true)  // Saadaval olevad
-                .build())
-            .toList());
-
-        // Lisa broneeritud toolid (not available)
-        seatDTOs.addAll(bookedSeats.stream()
-            .map(seat -> SeatDTO.builder()
-                .id(seat.getId())
-                .row(seat.getRow())
-                .planeId(seat.getPlane().getId())
-                .seat_column(seat.getSeat_column())
-                .recommended(false)
-                .available(false)  // Broneeritud toolid
-                .build())
-            .toList());
-
-        seatDTOs.addAll(recommendedSeats.stream()
-            .map(seat -> SeatDTO.builder()
-                .id(seat.getId())
-                .row(seat.getRow())
-                .planeId(seat.getPlane().getId())
-                .seat_column(seat.getSeat_column())
-                .recommended(true)
-                .available(false)  // Märgime soovitatud toolid broneerituks
-                .build())
-            .toList());
-
-        return seatDTOs;
-    }
 
     public List<SeatDTO> generateAndRecommendSeats(Integer seatCount, Integer planeId, Integer flightId) {
         Plane plane = planeRepository.findById(planeId)
@@ -182,11 +73,12 @@ public class SeatService {
 
             seatRepository.saveAll(newSeats);
         }
-
-        // Leia saadaval olevad toolid
         List<Seat> availableSeats = seatRepository.findByPlaneId(planeId).stream()
             .filter(Seat::getAvailable)
+            .sorted(Comparator.comparingInt(Seat::getRow)
+                .thenComparing(seat -> seat.getSeat_column().charAt(0))) // Sorteeri rea ja veeru järgi
             .toList();
+
 
         // Leia broneeritud toolid
         List<Seat> bookedSeats = seatRepository.findByPlaneId(planeId).stream()
@@ -195,6 +87,29 @@ public class SeatService {
 
         // Broneeri soovitatud kohad ja loo piletid
         List<Seat> recommendedSeats = new ArrayList<>();
+        Map<Integer, List<Seat>> seatsByRow = availableSeats.stream()
+            .collect(Collectors.groupingBy(Seat::getRow));
+
+        for (List<Seat> rowSeats : seatsByRow.values()) {
+            if (recommendedSeats.size() >= seatCount) break; // Kui juba piisavalt leitud, lõpeta
+
+            for (int i = 0; i <= rowSeats.size() - seatCount; i++) {
+                List<Seat> candidateSeats = rowSeats.subList(i, i + seatCount);
+
+                if (candidateSeats.size() == seatCount) {
+                    recommendedSeats.addAll(candidateSeats);
+                    break; // Leia ainult üks komplekt samast reast
+                }
+            }
+        }
+        if (recommendedSeats.size() < seatCount) {
+            for (Seat seat : availableSeats) {
+                if (!recommendedSeats.contains(seat)) {
+                    recommendedSeats.add(seat);
+                    if (recommendedSeats.size() >= seatCount) break;
+                }
+            }
+        }
         List<Ticket> recommendTickets = new ArrayList<>();
 
         for (int i = 0; i < seatCount; i++) {
@@ -272,4 +187,52 @@ public class SeatService {
         return ticketRepository.existsBySeatIdAndFlightId(seat.getId(), flightId);
     }
 
+
+    // ✅ Kas koht on akna ääres? (rea esimene või viimane iste)
+    private boolean isWindowSeat(Seat seat) {
+        String column = seat.getSeat_column();
+        return column.equals("A") || column.equals("F"); // Lennukitel on akna ääres tavaliselt A ja F
+    }
+
+    // ✅ Kas koht on väljapääsureas?
+    private boolean isExitRow(Seat seat) {
+        return seat.getRow() == 10 || seat.getRow() == 20; // Oletame, et väljapääsuread on 10 ja 20
+    }
+    public List<SeatDTO> getSeatsWithFilters(Integer flightId, Integer planeId, List<SeatFilter> filters) throws IOException {
+        // 1️⃣ Lae JSON andmed
+        List<Seating> seatings = SeatLoader.loadSeatsFromJson();
+
+        // 2️⃣ Loo kaardistus (key: "row + column", value: Seating)
+        Map<String, Seating> seatingMap = seatings.stream()
+            .collect(Collectors.toMap(s -> s.getRow() + s.getColumn(), s -> s));
+
+        // 3️⃣ Filtreeri istmed, mis vastavad JSON filtritele
+        return seatRepository.findByPlaneId(planeId).stream()
+            .filter(seat -> {
+                Seating seating = seatingMap.getOrDefault(seat.getRow() + seat.getSeat_column(), null);
+                return seating != null && filters.contains(seating.getFilter());
+            })
+            .map(seat -> SeatDTO.builder()
+                .id(seat.getId())
+                .row(seat.getRow())
+                .planeId(seat.getPlane().getId())
+                .seat_column(seat.getSeat_column())
+                .available(seat.getAvailable())
+                .recommended(false)
+                .build())
+            .toList();
+    }
+
+    private List<Seat> findBestAdjacentSeats(List<Seat> seats, int seatCount) {
+        Map<Integer, List<Seat>> seatsByRow = seats.stream()
+            .collect(Collectors.groupingBy(Seat::getRow));
+
+        for (List<Seat> rowSeats : seatsByRow.values()) {
+            if (rowSeats.size() >= seatCount) {
+                return rowSeats.subList(0, seatCount); // Võta järjestikused toolid
+            }
+        }
+
+        return seats.subList(0, Math.min(seats.size(), seatCount)); // Kui pole järjestikuseid, võta lähimad
+    }
 }

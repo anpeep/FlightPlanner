@@ -3,8 +3,8 @@
     <h3>Filters</h3>
 
     <div class="filter">
-      <input type="checkbox" id="legroom" v-model="filters.legroom" />
-      <label for="legroom">More Legroom</label>
+      <input type="checkbox" id="window" v-model="filters.window" />
+      <label for="window">Window Seat</label>
     </div>
 
     <div class="filter">
@@ -13,34 +13,46 @@
     </div>
 
     <div class="filter">
-      <input type="checkbox" id="adjacent" v-model="filters.adjacent" />
-      <label for="adjacent">Adjacent Seats (for multiple tickets)</label>
+      <input type="checkbox" id="legroom" v-model="filters.legroom" />
+      <label for="legroom">More Legroom</label>
     </div>
 
-    <h3>Legend</h3>
-    <ul>
-      <li><span class="legend seat-business"></span> Business Class</li>
-      <li><span class="legend seat-economy"></span> Economy Class</li>
-      <li><span class="legend seat-booked"></span> Booked</li>
-    </ul>
-    <button class="continue-btn" @click="continueBooking">Continue to Book</button>
+    <button class="apply-filters-btn" @click="applyFilters">Apply Filters</button>
   </div>
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   data() {
     return {
       filters: {
-        legroom: false,
+        window: false,
         exit: false,
-        adjacent: false
+        legroom: false
       }
     };
   },
   methods: {
-    continueBooking() {
-      this.$router.push({ name: 'Checkout' });
+    async applyFilters() {
+      try {
+        const selectedFilters = Object.keys(this.filters)
+            .filter(key => this.filters[key])
+            .map(filter => filter.toUpperCase());
+
+        const response = await axios.post("/api/seats/filters", null, {
+          params: {
+            flightId: this.$route.query.flightId,
+            planeId: this.$route.query.planeId,
+            filters: selectedFilters
+          }
+        });
+
+        this.$emit("updateSeats", response.data);
+      } catch (error) {
+        console.error("Error applying filters:", error);
+      }
     }
   }
 };
