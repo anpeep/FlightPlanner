@@ -1,16 +1,13 @@
 package com.example.test.service;
+
 import com.example.test.dto.FlightDTO;
 import com.example.test.mapping.FlightMapper;
-import com.example.test.mapping.PlaneMapper;
 import com.example.test.model.Flight;
 import com.example.test.model.Plane;
 import com.example.test.repository.FlightRepository;
 import com.example.test.repository.PlaneRepository;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -18,10 +15,7 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
 @RequiredArgsConstructor
 
 @Service

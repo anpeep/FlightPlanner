@@ -1,8 +1,8 @@
 package com.example.test.mapping;
 
-import org.mapstruct.Mapper;
 import com.example.test.dto.FlightDTO;
 import com.example.test.model.Flight;
+import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")  // Make sure this is present
 public interface FlightMapper {

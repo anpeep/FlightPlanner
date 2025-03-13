@@ -51,7 +51,7 @@ export default {
       departureCity: "",
       arrivalCity: "",
       selectedDate: "",
-      ticketCount: 1,
+      ticketCount: localStorage.getItem('ticketCount') ? parseInt(localStorage.getItem('ticketCount')) : 1, // Load from localStorage
       flights: [],
       flightId: "",
       planeId: "",
@@ -106,9 +106,9 @@ export default {
           // Step 2: Fetch available seats using the flight & plane IDs
           await axios.post("/api/seats/getSeats", null, {
             params: {
+              flightId: this.flightId,
               seatCount: this.ticketCount,
-              planeId: this.flights[0].planeId,
-              flightId: this.flightId
+              planeId: this.flights[0].planeId
             }
           });
         }
@@ -118,14 +118,20 @@ export default {
       }
     },
 
-    // Pileti arvu muutmise funktsioonid
     increaseTicketCount() {
       this.ticketCount++;
+      this.updateLocalStorage();
     },
     decreaseTicketCount() {
       if (this.ticketCount > 1) {
         this.ticketCount--;
+        this.updateLocalStorage();
       }
+    },
+
+    // Salvestame ticketCount lokaalselt, et saaks hiljem kasutada
+    updateLocalStorage() {
+      localStorage.setItem('ticketCount', this.ticketCount);
     },
 
     formatInstant(instant) {

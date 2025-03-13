@@ -2,15 +2,12 @@ package com.example.test.service;
 
 import com.example.test.dto.FlightDTO;
 import com.example.test.dto.PlaneDTO;
-import com.example.test.mapping.PlaneMapper;
 import com.example.test.model.Plane;
 import com.example.test.repository.PlaneRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service

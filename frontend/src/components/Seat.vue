@@ -34,9 +34,7 @@ export default {
     },
     drop(event) {
       const droppedSeat = JSON.parse(event.dataTransfer.getData("seat"));
-
-      if (droppedSeat.number === this.number) return; // Väldi enda peale lohistamist
-
+      if (droppedSeat.number === this.number) return;
       console.log(`Swapping seat ${droppedSeat.number} with ${this.number}`);
       this.$emit("swapSeats", droppedSeat.number, this.number);
     }

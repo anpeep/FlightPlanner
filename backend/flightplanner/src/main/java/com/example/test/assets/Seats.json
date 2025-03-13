@@ -2,13 +2,13 @@
   {
     "filter": "LEGROOM_EXIT_WINDOW",
     "row": 1,
-    "column": "1A",
+    "column": "1C",
     "type": "business"
   },
   {
     "filter": "LEGROOM_EXIT",
     "row": 1,
-    "column": "B",
+    "column": "D",
     "type": "business"
   },
   {

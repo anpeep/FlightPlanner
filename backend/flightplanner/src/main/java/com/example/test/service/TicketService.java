@@ -1,25 +1,7 @@
 package com.example.test.service;
 
-import com.example.test.assets.Seating;
-import com.example.test.dto.TicketDTO;
-import com.example.test.mapping.TicketMapper;
-import com.example.test.model.Flight;
-import com.example.test.model.Seat;
-import com.example.test.model.Ticket;
-import com.example.test.repository.FlightRepository;
-import com.example.test.repository.SeatRepository;
-import com.example.test.repository.TicketRepository;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor

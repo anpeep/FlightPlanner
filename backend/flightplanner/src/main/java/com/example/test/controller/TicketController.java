@@ -1,16 +1,8 @@
 package com.example.test.controller;
 
-import com.example.test.dto.SeatDTO;
-import com.example.test.dto.TicketDTO;
-import com.example.test.model.Ticket;
-import com.example.test.service.TicketService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Optional;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
