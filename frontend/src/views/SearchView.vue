@@ -21,23 +21,23 @@
 
     <div class="input-group">
       <label>Select Date:</label>
-      <input type="date" v-model="selectedDate" @change="searchFlights" />
+      <input type="date" v-model="selectedDate" />
     </div>
 
     <h3 v-if="flights.length">Available Flights</h3>
-    <ul v-if="flights.length">
-      <li
+    <div class="flights-list" v-if="flights.length">
+      <div
           v-for="flight in flights"
           :key="flight.id"
           @click="goToSeatSelection(flight)"
+          class="flight-card"
           style="cursor: pointer;"
       >
-        <strong>{{ flight.departureCity }} → {{ flight.arrivalCity }}</strong><br />
-        🛫 Departure: {{ formatInstant(flight.departOn) }} <br />
-        🛬 Arrival: {{ formatInstant(flight.arriveOn) }} <br />
-        ✈️ Plane ID: {{ flight.planeId }}
-      </li>
-    </ul>
+        <strong>{{ flight.departureCity }} → {{ flight.arrivalCity }}</strong>
+        <div>🛫 Departure: {{ formatInstant(flight.departOn) }}</div>
+        <div>🛬 Arrival: {{ formatInstant(flight.arriveOn) }}</div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -50,7 +50,7 @@ export default {
     return {
       departureCity: "",
       arrivalCity: "",
-      selectedDate: "",
+      selectedDate: null, // Siia salvestatakse valitud kuupäev
       ticketCount: localStorage.getItem('ticketCount') ? parseInt(localStorage.getItem('ticketCount')) : 1, // Load from localStorage
       flights: [],
       flightId: "",
@@ -74,10 +74,23 @@ export default {
 
     return { goToSeatSelection };
   },
+  watch: {
+    // Watch for changes in departureCity, arrivalCity, or selectedDate
+    departureCity() {
+      this.searchFlights();
+    },
+    arrivalCity() {
+      this.searchFlights();
+    },
+    selectedDate() {
+      this.searchFlights();
+    }
+  },
   methods: {
     async searchFlights() {
+      // Only run if all fields are filled
       if (!this.departureCity || !this.arrivalCity || !this.selectedDate) {
-        return;
+        return; // Exit early if any of the fields are empty
       }
 
       try {
@@ -85,19 +98,16 @@ export default {
           params: {
             departureCity: this.departureCity,
             arrivalCity: this.arrivalCity,
-            date: this.selectedDate,
+            date: this.selectedDate, // Use the date as entered, formatted to 'YYYY-MM-DD'
           }
         });
-        console.log(response.data)
+        console.log(response.data);
 
         this.flights = response.data.map(flight => ({
           planeId: flight.planeId,
           ...flight,
           flightId: flight.id,
         }));
-
-        console.log(this.flights[0].planeId + " stuff");
-
 
         if (this.flights.length > 0) {
           // Use the first flight for now (modify as needed)
@@ -114,7 +124,6 @@ export default {
         }
       } catch (error) {
         console.error("Error fetching flights:", error);
-
       }
     },
 
@@ -129,7 +138,6 @@ export default {
       }
     },
 
-    // Salvestame ticketCount lokaalselt, et saaks hiljem kasutada
     updateLocalStorage() {
       localStorage.setItem('ticketCount', this.ticketCount);
     },
