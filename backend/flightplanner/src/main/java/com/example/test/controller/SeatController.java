@@ -15,7 +15,6 @@ import java.util.*;
 @RestController
 public class SeatController {
     private final SeatService seatService;
-    private final SeatRepository seatRepository;
 
     @PostMapping("/getSeats")
     public ResponseEntity<List<SeatDTO>> getSeats(

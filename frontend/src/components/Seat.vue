@@ -29,6 +29,7 @@ export default {
       event.dataTransfer.setData("seat", JSON.stringify({
         number: this.number,
         isRecommended: this.isRecommended
+
       }));
     },
     drop(event) {

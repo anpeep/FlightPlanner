@@ -50,7 +50,7 @@ export default {
     return {
       departureCity: "",
       arrivalCity: "",
-      selectedDate: null, // Siia salvestatakse valitud kuupäev
+      selectedDate: "",
       ticketCount: localStorage.getItem('ticketCount') ? parseInt(localStorage.getItem('ticketCount')) : 1, // Load from localStorage
       flights: [],
       flightId: "",
@@ -59,7 +59,6 @@ export default {
   },
   setup() {
     const router = useRouter();
-
     const goToSeatSelection = (flight) => {
       console.log("Navigating with flightId:", flight.id, "and planeId:", flight.planeId);
 
@@ -75,7 +74,6 @@ export default {
     return { goToSeatSelection };
   },
   watch: {
-    // Watch for changes in departureCity, arrivalCity, or selectedDate
     departureCity() {
       this.searchFlights();
     },
@@ -88,17 +86,12 @@ export default {
   },
   methods: {
     async searchFlights() {
-      // Only run if all fields are filled
-      if (!this.departureCity || !this.arrivalCity || !this.selectedDate) {
-        return; // Exit early if any of the fields are empty
-      }
-
       try {
         const response = await axios.post("/api/flight/generate", null, {
           params: {
+            date: this.selectedDate,
             departureCity: this.departureCity,
             arrivalCity: this.arrivalCity,
-            date: this.selectedDate, // Use the date as entered, formatted to 'YYYY-MM-DD'
           }
         });
         console.log(response.data);
@@ -110,10 +103,7 @@ export default {
         }));
 
         if (this.flights.length > 0) {
-          // Use the first flight for now (modify as needed)
           this.flightId = this.flights[0].flightId;
-
-          // Step 2: Fetch available seats using the flight & plane IDs
           await axios.post("/api/seats/getSeats", null, {
             params: {
               flightId: this.flightId,

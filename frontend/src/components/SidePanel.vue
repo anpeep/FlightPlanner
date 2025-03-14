@@ -36,43 +36,28 @@ export default {
         near: false,
       },
 
-      seats: [],  // Toolide andmed, mida kuvada
+      seats: [],
     };
   },
   methods: {
       async applyFilters() {
         try {
           const filters = [];
-
-          // Koguge aktiivsed filtrid
-          if (this.filters.window) filters.push(1);   // Akna tooli filter
-          if (this.filters.exit) filters.push(2);     // Väljapääsu tooli filter
-          if (this.filters.legroom) filters.push(3);   // Rohkem jalaruumi filter
-          if (this.filters.near && localStorage.getItem('ticketCount') > 1) filters.push(4); // Lähedal olevate toolide filter, ainult kui rohkem kui 1 pilet
-
-          const flightId = this.$route.query.flightId;  // Lennu ID URL-ist
-          const planeId = this.$route.query.planeId;    // Lennuki ID URL-ist
-
-          // Kontrollige, kas flightId ja planeId on olemas
-          if (!flightId || !planeId) {
-            console.error("❌ Missing flightId or planeId");
-            alert("Lennu ja lennuki ID-d puuduvad! Kontrollige URL-i.");
-            return;
-          }
-
-          const seatCount = localStorage.getItem('ticketCount') || 1; // Pileti arvu toomine localStorage-st
-
-          // Saadame filtrid koos parameetritega serverisse
+          if (this.filters.window) filters.push(1);
+          if (this.filters.exit) filters.push(2);
+          if (this.filters.legroom) filters.push(3);
+          if (this.filters.near) filters.push(4);
+          const flightId = this.$route.query.flightId;
+          const planeId = this.$route.query.planeId;
+          const seatCount = localStorage.getItem('ticketCount');
           const response = await axios.post("/api/seats/addFilters", filters, {
             params: {
               seatCount: seatCount,
-              flightId: flightId,  // Lennu ID päringu parameetritena
-              planeId: planeId     // Lennuki ID päringu parameetritena
+              flightId: flightId,
+              planeId: planeId
             }
           });
-
-          console.log("✅ Filters applied:", response.data);
-          this.$emit("filtersUpdated", response.data);  // Saadame värskendatud toolide andmed vanemale
+          this.$emit("filtersUpdated", response.data);
         } catch (error) {
           console.error("❌ Error applying filters:", error.response?.data || error.message);
         }
