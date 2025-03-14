@@ -37,9 +37,6 @@
             <column name="flight_id" type="int">
                 <constraints nullable="false"/>
             </column>
-            <column name="price" type="float">
-                <constraints nullable="false"/>
-            </column>
         </createTable>
 
         <createTable tableName="plane">

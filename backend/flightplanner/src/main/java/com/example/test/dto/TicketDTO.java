@@ -9,5 +9,4 @@ public class TicketDTO {
     private Integer id;
     private String seatId;
     private Integer flightId;
-    private Float price;
 }

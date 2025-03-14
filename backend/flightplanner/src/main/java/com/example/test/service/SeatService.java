@@ -9,6 +9,7 @@ import com.example.test.repository.PlaneRepository;
 import com.example.test.repository.SeatRepository;
 import com.example.test.repository.TicketRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -33,9 +34,8 @@ public class SeatService {
             int totalColumns = 8;
 
             for (int row = 1; row <= totalRows; row++) {
-                List<String> seatPositions = new ArrayList<>();
+                List<String> seatPositions;
 
-                // Erinevad paigutused vastavalt reale
                 if (row == 1) {
                     seatPositions = List.of("C", "D", "E", "F");  // Esimene rida
                 } else if (row == 5 || row == 11) {
@@ -57,7 +57,7 @@ public class SeatService {
             int bookedSeatsCount = random.nextInt(totalSeats - seatCount);
             Collections.shuffle(newSeats);
 
-            for (int i = 0; i < bookedSeatsCount + 1; i++) {
+            for (int i = 0; i < bookedSeatsCount - 2; i++) {
                 newSeats.get(i).setAvailable(false);
             }
 
@@ -72,7 +72,6 @@ public class SeatService {
             .filter(seat -> !seat.getAvailable())
             .toList();
 
-        // Broneeri soovitatud kohad ja loo piletid
         List<Seat> recommendedSeats = new ArrayList<>();
         Map<Integer, List<Seat>> seatsByRow = availableSeats.stream()
             .collect(Collectors.groupingBy(Seat::getRow));
@@ -107,7 +106,6 @@ public class SeatService {
             Ticket ticket = new Ticket();
             ticket.setSeat(seat);
             ticket.setFlight(flightRepository.findById(flightId).orElseThrow());
-            ticket.setPrice(random.nextFloat() * 100);
             recommendTickets.add(ticket);
         }
 
@@ -137,8 +135,6 @@ public class SeatService {
                 .recommended(false)
                 .build())
             .toList());
-
-        // Soovitatud toolid
         seatDTOs.addAll(recommendedSeats.stream()
             .map(seat -> SeatDTO.builder()
                 .id(seat.getId())
@@ -153,10 +149,9 @@ public class SeatService {
         return seatDTOs;
     }
 
-    public List<SeatDTO> getSeatsByFlight(Integer flightId, Integer planeId) {
+    public Map<String, List<SeatDTO>> getSeatsByFlight(Integer flightId, Integer planeId) {
         List<Seat> allSeats = seatRepository.findByPlaneId(planeId);
-
-        return allSeats.stream()
+        List<SeatDTO> seatDTOS = allSeats.stream()
             .map(seat -> SeatDTO.builder()
                 .id(seat.getId())
                 .row(seat.getRow())
@@ -166,50 +161,124 @@ public class SeatService {
                 .recommended(isRecommendedSeat(seat, flightId))
                 .build())
             .toList();
+        Map<String, List<SeatDTO>> seatGroups = new HashMap<>();
+        seatGroups.put("availableSeats", seatDTOS.stream().filter(seat -> seat.getAvailable() && !seat.getRecommended()).toList());
+        seatGroups.put("bookedSeats", seatDTOS.stream().filter(seat -> !seat.getAvailable() && !seat.getRecommended()).toList());
+        seatGroups.put("recommendedSeats", seatDTOS.stream().filter(SeatDTO::getRecommended).toList());  // Täiendav kontroll siin!
+        return seatGroups;
     }
     private boolean isRecommendedSeat(Seat seat, Integer flightId) {
         return ticketRepository.existsBySeatIdAndFlightId(seat.getId(), flightId);
     }
 
-
-
-    public List<Seat> applyFiltersAndRecommendSeats(Integer planeId, Integer flightId, List<Integer> filters) {
+    public List<SeatDTO> addFilters(Integer flightId, Integer seatCount, Integer planeId, List<Integer> filters) {
+        // Leia kõik toolid selle lennuki jaoks
         List<Seat> allSeats = seatRepository.findByPlaneId(planeId);
-        List<Seat> availableSeats = allSeats.stream().filter(Seat::getAvailable).collect(Collectors.toList());  // Saadaval olevad toolid
 
-        // Rakendame valitud filtreid
-        allSeats.stream().filter(Seat::getAvailable).forEach(seat -> {
+        // 1️⃣ EEMALDA KÕIK VARASEMAD SOOVITUSED
+        allSeats.forEach(seat -> seat.setRecommended(false));
 
-            boolean matchesAllFilters = true; // Alustame tõene kõikide filtrite jaoks
+        // 2️⃣ FILTREERI VABAD TOOLID
+        List<Seat> availableSeats = allSeats.stream()
+            .filter(Seat::getAvailable)  // Ainult saadaval olevad toolid
+            .toList();
 
-            // Akna tooli filter
-            if (filters.contains(1) && !seat.getSeat_column().equals("A") && !seat.getSeat_column().equals("F")) {
-                matchesAllFilters = false;
-                seat.setRecommended(false); // Eemaldame soovituse
-            }
+        // 3️⃣ RAKENDA KÕIK FILTRID DÜNAAMILISELT
+        List<Seat> filteredSeats = availableSeats.stream()
+            .filter(seat -> {
+                boolean matchesAllFilters = true; // Tool peab vastama kõigile valitud filtritele
 
-            // Väljapääsu filter
-            if (filters.contains(2) && (seat.getRow() != 10 && seat.getRow() != 5)) {
-                matchesAllFilters = false;
-                seat.setRecommended(false); // Eemaldame soovituse
-            }
+                if (filters.contains(1)) { // Kas tool on akna ääres?
+                    matchesAllFilters &= (seat.getSeat_column().equals("A") || seat.getSeat_column().equals("H"));
+                }
+                if (filters.contains(2)) { // Kas tool on väljapääsu rea juures?
+                    List<String> exitRows = List.of("10", "4", "2", "6"); // Väljapääsu read
+                    List<String> exitCols = List.of("A", "B", "G", "H"); // Väljapääsu kohad
+                    matchesAllFilters &= (exitRows.contains(String.valueOf(seat.getRow())) &&
+                        exitCols.contains(seat.getSeat_column()));
+                }
+                if (filters.contains(3)) { // Kas tool on väljapääsu juures ja akna ääres?
+                    List<String> exitRows = List.of("10", "4", "2", "6");
+                    matchesAllFilters &= (exitRows.contains(String.valueOf(seat.getRow())) &&
+                        (seat.getSeat_column().equals("A") || seat.getSeat_column().equals("H")));
+                }
+                if (filters.contains(4) && availableSeats.size() > 1) {
+                    matchesAllFilters &= isNear(seat, availableSeats, seatCount);
+                }
+                return matchesAllFilters;
+            })
+            .toList();
 
-            // Väljapääsu ja akna toolide ristmik
-            if (filters.contains(3) && !(seat.getRow() == 10 || seat.getRow() == 5) &&
-                !(seat.getSeat_column().equals("A") || seat.getSeat_column().equals("F"))) {
-                matchesAllFilters = false;
-                seat.setRecommended(false); // Eemaldame soovituse
-            }
-            // Kui kõik filtrid sobivad, siis lubame tooli soovituse
-            if (matchesAllFilters) {
-                seat.setRecommended(true);  // Soovitage tool
-            }
-        });
+        // Kui leidub toolid, mis vastavad kõigile filtritele, märgime need soovitatuks
+        if (!filteredSeats.isEmpty()) {
+            filteredSeats.forEach(seat -> seat.setRecommended(true));
+        }
 
-        // Tagastame kõik toolid, millel on uus soovitus
-        return allSeats.stream()
-            .filter(Seat::getRecommended)  // Kui tool on soovitatud, siis lisame selle
-            .collect(Collectors.toList());
+        // Kui ei ole piisavalt filtreeritud kohti, siis täiendame suvaliste toolidega
+// 4️⃣ Kui ei ole piisavalt filtreeritud kohti, siis täiendame suvaliste toolidega
+        if (filteredSeats.size() < seatCount) {
+            int remainingSeatsCount = seatCount - filteredSeats.size();
+
+            // Vali suvaliselt vabad toolid
+            List<Seat> remainingSeats = availableSeats.stream()
+                .limit(remainingSeatsCount)
+                .toList();
+            // Märgi need toolid soovitatuks
+            remainingSeats.forEach(seat -> seat.setRecommended(true));
+
+            // Loo uus list, mis sisaldab nii filtreeritud kui ka suvalisi kohti
+            List<Seat> updatedFilteredSeats = new ArrayList<>(filteredSeats);
+            updatedFilteredSeats.addAll(remainingSeats); // Lisa suvalised toolid
+
+            // Kasuta uut updatedFilteredSeats listi edasistes toimingutes
+            filteredSeats = updatedFilteredSeats;
+        }
+
+
+        // 4️⃣ SALVESTA UUENDATUD TOOLID
+        seatRepository.saveAll(allSeats);
+
+        return filteredSeats.stream()
+            .map(seat -> SeatDTO.builder()
+                .id(seat.getId())
+                .row(seat.getRow())
+                .planeId(planeId)
+                .seat_column(seat.getSeat_column())
+                .recommended(true)
+                .available(true)
+                .build())
+            .limit(seatCount) // Võtame ainult seatCount arv toole
+            .toList();
     }
 
+    private boolean isNear(Seat currentSeat, List<Seat> availableSeats, Integer seatCount) {
+        // Kui seatCount on suurem kui 1, proovime leida järjestatud kohti
+        if (seatCount > 1) {
+            // Kogume kõik toolid, mis on samas reas ja järjestatud
+            List<Seat> nearbySeats = availableSeats.stream()
+                .filter(seat -> seat.getRow().equals(currentSeat.getRow()))
+                .sorted(Comparator.comparing(seat -> seat.getSeat_column().charAt(0)))  // Sorteerime toolid samas reas
+                .toList();
+
+            // Leiame järjestatud toolid, mis on üksteise kõrval
+            for (int i = 0; i < nearbySeats.size() - seatCount + 1; i++) {
+                List<Seat> possibleSeats = nearbySeats.subList(i, i + seatCount);  // Kontrollime järgmise seatCount arvu järjestatud kohti
+                boolean areSeatsAdjacent = true;
+
+                // Kontrollime, kas need toolid on üksteise kõrval
+                for (int j = 0; j < possibleSeats.size() - 1; j++) {
+                    if (Math.abs(possibleSeats.get(j).getSeat_column().charAt(0) - possibleSeats.get(j + 1).getSeat_column().charAt(0)) != 1) {
+                        areSeatsAdjacent = false;
+                        break;
+                    }
+                }
+
+                if (areSeatsAdjacent) {
+                    // Kui need toolid on üksteise kõrval, siis tagastame tõene
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 }

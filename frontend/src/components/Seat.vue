@@ -3,7 +3,6 @@
       :src="getSeatImage"
       :alt="number"
       class="seat"
-      :class="classType"
       :draggable="isRecommended"
   @dragstart="dragStart"
   @dragover.prevent
@@ -17,7 +16,7 @@ import seatBookedImage from "@/assets/seat-booked.png";
 import seatRecommendImage from "@/assets/seat-recommend.png";
 
 export default {
-  props: ["number", "isBooked", "isRecommended", "classType"],
+  props: ["number", "isBooked", "isRecommended"],
   methods: {
     dragStart(event) {
       if (!this.isRecommended) {
