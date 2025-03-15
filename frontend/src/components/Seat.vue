@@ -41,7 +41,7 @@ export default {
   },
   computed: {
     getSeatImage() {
-      return this.isRecommended ? seatRecommendImage : this.isBooked ? seatBookedImage : seatImage;
+      return this.isRecommended && !this.isBooked ? seatRecommendImage : this.isBooked ? seatBookedImage : seatImage;
     }
   }
 };

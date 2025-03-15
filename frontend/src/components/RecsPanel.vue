@@ -21,6 +21,31 @@
       <input type="checkbox" id="near" v-model="filters.near" @change="applyFilters" />
       <label for="near">Near Seats</label>
     </div>
+
+    <v-col cols="12" md="6">
+      <v-text-field
+          v-model="seatCount"
+          label="Tickets"
+          type="number"
+          min="1"
+          readonly
+          outlined
+      >
+        <template v-slot:append>
+          <!-- Increase button -->
+          <v-btn icon @click="increaseSeatCount" aria-label="Increase Ticket Count">
+            + <!-- Plus sign -->
+          </v-btn>
+        </template>
+
+        <template v-slot:prepend>
+          <!-- Decrease button -->
+          <v-btn icon @click="decreaseSeatCount" aria-label="Decrease Ticket Count">
+            - <!-- Minus sign -->
+          </v-btn>
+        </template>
+      </v-text-field>
+    </v-col>
   </div>
 </template>
 
@@ -36,33 +61,65 @@ export default {
         legroom: false,
         near: false,
       },
-
-      seats: [],
+      seatCount: 1,
+      seats: [], // Stores all the seats
     };
   },
+
   methods: {
     async applyFilters() {
+      console.log("Applying filters...");
       try {
         const filters = [];
         if (this.filters.window) filters.push(1);
         if (this.filters.exit) filters.push(2);
         if (this.filters.legroom) filters.push(3);
         if (this.filters.near) filters.push(4);
+
+        // If no filters are selected, skip the API call
+        if (filters.length === 0) {
+          console.log("No filters selected, skipping API request.");
+          return;
+        }
+
         const flightId = this.$route.query.flightId;
         const planeId = this.$route.query.planeId;
-        const seatCount = localStorage.getItem('ticketCount');
+        const seatCount = this.seatCount;
+
         const response = await axios.post("/api/seats/addFilters", filters, {
           params: {
             seatCount: seatCount,
             flightId: flightId,
-            planeId: planeId
-          }
+            planeId: planeId,
+          },
         });
         this.$emit("filtersUpdated", response.data);
       } catch (error) {
         console.error("❌ Error applying filters:", error.response?.data || error.message);
       }
-    }
+    },
+
+    updateSeats(filteredSeats) {
+      // Process and update the seats based on filtered data
+      this.seats = filteredSeats;
+
+      // Log or inspect the updated seats array
+      console.log("Updated seats:", this.seats);
+    },
+
+    increaseSeatCount() {
+      if (this.seatCount < 72) {
+        this.seatCount++;
+      } else {
+        console.log("❌ Ticket count cannot exceed 72");
+      }
+    },
+
+    decreaseSeatCount() {
+      if (this.seatCount > 1) {
+        this.seatCount--;
+      }
+    },
   },
 };
 </script>

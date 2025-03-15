@@ -14,4 +14,6 @@ public class FlightDTO {
     private Instant departOn;
     private Instant arriveOn;
     private Integer planeId; // Lennuki ID
+    private Float price;
+
 }

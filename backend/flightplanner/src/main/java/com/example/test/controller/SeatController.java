@@ -18,11 +18,11 @@ public class SeatController {
 
     @PostMapping("/getSeats")
     public ResponseEntity<List<SeatDTO>> getSeats(
-        @RequestParam Integer seatCount,
         @RequestParam Integer planeId,
         @RequestParam Integer flightId) {
+        System.out.println(" darkness here");
 
-        List<SeatDTO> seats = seatService.generateAndRecommendSeats(seatCount, planeId, flightId);
+        List<SeatDTO> seats = seatService.generateAndRecommendSeats(planeId, flightId);
         return ResponseEntity.ok(seats);
     }
     @GetMapping("/getSeatsByFlight")
@@ -30,6 +30,7 @@ public class SeatController {
         @RequestParam Integer flightId,
         @RequestParam Integer planeId) {
         Map<String, List<SeatDTO>> allSeats = seatService.getSeatsByFlight(flightId, planeId);
+
         return ResponseEntity.ok(allSeats);
     }
     @PostMapping("/addFilters")
@@ -38,7 +39,8 @@ public class SeatController {
         @RequestParam Integer seatCount,
         @RequestParam Integer planeId,
         @RequestBody List<Integer> filters) {
-        List<SeatDTO> seats = seatService.addFilters(flightId, seatCount, planeId, filters);
+        List<SeatDTO> seats = seatService.
+            addFilters(flightId, seatCount, planeId, filters);
         return ResponseEntity.ok(seats);
     }
 }

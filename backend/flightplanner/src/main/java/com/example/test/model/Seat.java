@@ -18,4 +18,16 @@ public class Seat {
     private Integer row;
     private Boolean recommended;
     private String seat_column;
+
+    @Override
+    public String toString() {
+        return "Seat{" +
+            "id=" + id +
+            ", plane=" + plane +
+            ", available=" + available +
+            ", row=" + row +
+            ", recommended=" + recommended +
+            ", seat_column='" + seat_column + '\'' +
+            '}';
+    }
 }

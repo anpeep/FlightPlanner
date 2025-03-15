@@ -23,4 +23,5 @@ public class Flight {
     private String arrivalCity;
     private Instant departOn;
     private Instant arriveOn;
+    private Float price;
 }

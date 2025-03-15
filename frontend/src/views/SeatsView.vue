@@ -1,6 +1,6 @@
 <template>
   <div class="seating-view">
-    <SidePanel @filtersUpdated="updateSeats" />
+    <RecsPanel @filtersUpdated="updateSeats" />
     <div class="seating">
       <div v-for="row in seats" :key="row.row" class="row">
         <div class="seat-group">
@@ -16,19 +16,18 @@
         </div>
       </div>
     </div>
-    <div class="airplane-body">
-      <img src="../assets/airplane.png" alt="Airplane Body" class="airplane-image" />
-    </div>
+
+
   </div>
 </template>
 
 <script>
 import axios from "axios";
 import Seat from "@/components/Seat.vue";
-import SidePanel from "@/components/SidePanel.vue";
+import RecsPanel from "@/components/RecsPanel.vue";
 
 export default {
-  components: { Seat, SidePanel },
+  components: { Seat, RecsPanel },
   data() {
     return {
       seats: [],
@@ -49,8 +48,10 @@ export default {
             planeId: this.$route.query.planeId,
           },
         });
+        console.log(response.data);
         this.availableSeats = response.data.availableSeats;
         this.bookedSeats = response.data.bookedSeats;
+        console.log(this.bookedSeats + "mama");
         this.recommendedSeats = response.data.recommendedSeats;
         this.generateSeats();
       } catch (error) {
@@ -64,12 +65,37 @@ export default {
     },
     generateSeats() {
       const seatMap = new Map(this.bookedSeats.map(seat => [`${seat.row}${seat.seat_column}`, true]));
-      const recommendedSeatMap = new Map(this.recommendedSeats.map(seat => [`${seat.row}${seat.seat_column}`, true]));
+      const recommendedSeatMap = new Map(this.recommendedSeats.map(seat => [`${seat.row}${seat.seat_column}`, true])); // Muuda väärtuseks true
+      const totalRows = 11;
 
-      this.seats = Array.from({ length: seatM }, (_, index) => {
+      this.seats = Array.from({ length: totalRows }, (_, rowIndex) => {
+        const row = rowIndex + 1;
+        let seatPositions;
+
+        if (row === 1) {
+          seatPositions = ["C", "D", "E", "F"];
+        } else if (row === 5 || row === 11) {
+          seatPositions = ["D", "E"];
+        } else {
+          seatPositions = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        }
+        console.log(seatMap + "sm")
+        console.log(recommendedSeatMap + "rm")
+
+        return {
+          row,
+          seats: seatPositions.map(pos => {
+            const key = `${row}${pos}`;
+            return {
+              position: pos,
+              booked: seatMap.has(key),
+              recommended: recommendedSeatMap.has(key),
+            }
+          })
+        };
       });
-
     },
+
     swapSeats(fromSeat, toSeat) {
       let fromSeatObj = null;
       let toSeatObj = null;

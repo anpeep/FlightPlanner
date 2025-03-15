@@ -22,15 +22,32 @@ public class SeatService {
     private final SeatRepository seatRepository;
     private final PlaneRepository planeRepository;
     private final SeatMapper seatMapper;
-    private final Random random = new Random();
+    private final Random random = new Random();public Map<String, List<SeatDTO>> getSeatsByFlight(Integer flightId, Integer planeId) {
+        if (seatRepository.countByPlaneId(planeId) == 0) {
+            generateAndRecommendSeats(planeId, flightId);
+        }
+        List<Seat> allSeats = seatRepository.findByPlaneId(planeId);
+        List<SeatDTO> seatDTOS = allSeats.stream()
+            .map(seatMapper::toDTO)
+            .toList();
 
-    public List<SeatDTO> generateAndRecommendSeats(Integer seatCount, Integer planeId, Integer flightId) {
+        Map<String, List<SeatDTO>> seatGroups = new HashMap<>();
+        seatGroups.put("availableSeats", seatDTOS.stream().filter(seat -> seat.getAvailable() && !seat.getRecommended()).toList());
+        seatGroups.put("bookedSeats", seatDTOS.stream().filter(seat -> !seat.getAvailable()).toList());
+        seatGroups.put("recommendedSeats", seatDTOS.stream().filter(SeatDTO::getRecommended).toList());
+
+
+        return seatGroups;
+    }
+
+    public List<SeatDTO> generateAndRecommendSeats(Integer planeId, Integer flightId) {
         Plane plane = planeRepository.findById(planeId)
             .orElseThrow(() -> new IllegalArgumentException("Plane not found with ID: " + planeId));
 
+        // If no seats exist for the plane, generate new seats
         if (seatRepository.countByPlaneId(planeId) == 0) {
             List<Seat> newSeats = new ArrayList<>();
-
+            // Generate seats for rows 1 to 11 with predefined seat positions
             for (int row = 1; row <= 11; row++) {
                 List<String> seatPositions = switch (row) {
                     case 1 -> List.of("C", "D", "E", "F");
@@ -44,40 +61,43 @@ public class SeatService {
                     seat.setRecommended(false);
                     seat.setRow(row);
                     seat.setSeat_column(pos);
-                    seat.setAvailable(true);
+                    seat.setAvailable(true); // Initially, set all seats as available
                     newSeats.add(seat);
                 }
             }
 
+            // Randomly assign some seats as booked
             int totalSeats = 72;
-            int bookedSeatsCount = random.nextInt(totalSeats - seatCount);
-            System.out.println(totalSeats);
-            System.out.println(seatCount);
-            Collections.shuffle(newSeats);
-            System.out.println(bookedSeatsCount);
-            System.out.println(newSeats.size());
+            int bookedSeatsCount = random.nextInt(totalSeats - 1); // Random number of booked seats
+            Collections.shuffle(newSeats); // Shuffle seats to randomize which ones get booked
             for (int i = 0; i < bookedSeatsCount; i++) {
-                newSeats.get(i).setAvailable(false);
+                newSeats.get(i).setAvailable(false); // Set the first `bookedSeatsCount` seats as booked
             }
 
+            // Save all newly created seats in the repository
             seatRepository.saveAll(newSeats);
         }
 
+        // Now fetch the available seats (do not touch booked seats)
         List<Seat> availableSeats = seatRepository.findByPlaneId(planeId).stream()
-            .filter(Seat::getAvailable)
+            .filter(Seat::getAvailable) // Only consider available seats
             .sorted(Comparator.comparingInt(Seat::getRow)
-                .thenComparing(seat -> seat.getSeat_column().charAt(0)))
+                .thenComparing(seat -> seat.getSeat_column().charAt(0))) // Sort by row and column
             .toList();
 
-        List<Seat> recommendedSeats = findExactAdjacentSeats(availableSeats, seatCount);
-        recommendedSeats.forEach(seat -> seat.setRecommended(true));
+        // Find adjacent seats for recommendation if needed (for example, if seatCount > 1)
+        List<Seat> recommendedSeats = findExactAdjacentSeats(availableSeats, 1);
+        recommendedSeats.forEach(seat -> seat.setRecommended(true)); // Mark recommended seats
 
-        seatRepository.saveAll(recommendedSeats); // Salvesta soovitused
+        // Save the recommended seats to the repository
+        seatRepository.saveAll(recommendedSeats);
+        List<SeatDTO> seatDTOS = availableSeats.stream()
+            .map(seatMapper::toDTO)
+            .toList();
+        seatDTOS.forEach(seat -> seat.setPlaneId(planeId));
 
-        // Ainult seatCount arv soovitusi
-
-        return availableSeats.stream()
-            .map(seatMapper::toDTO).toList();
+        // Return available seats as DTOs
+        return seatDTOS;
     }
 
     private List<Seat> findExactAdjacentSeats(List<Seat> availableSeats, int seatCount) {
@@ -106,76 +126,60 @@ public class SeatService {
         return true;
     }
 
-    public Map<String, List<SeatDTO>> getSeatsByFlight(Integer flightId, Integer planeId) {
-        List<Seat> allSeats = seatRepository.findByPlaneId(planeId);
-        List<SeatDTO> seatDTOS = allSeats.stream()
-            .map(seatMapper::toDTO).toList();
-        Map<String, List<SeatDTO>> seatGroups = new HashMap<>();
-
-
-        seatGroups.put("availableSeats", seatDTOS.stream().filter(seat -> seat.getAvailable() && !seat.getRecommended()).toList());
-        seatGroups.put("bookedSeats", seatDTOS.stream().filter(seat -> !seat.getAvailable()).toList());
-        seatGroups.put("recommendedSeats", seatDTOS.stream().filter(SeatDTO::getRecommended).toList());
-        System.out.println(seatGroups.get("recommendedSeats" ));
-        return seatGroups;
-    }
 
     public List<SeatDTO> addFilters(Integer flightId, Integer seatCount, Integer planeId, List<Integer> filters) {
         List<Seat> allSeats = seatRepository.findByPlaneId(planeId);
-        allSeats.forEach(seat -> seat.setRecommended(false));
-        List<Seat> availableSeats = allSeats.stream()
-            .filter(Seat::getAvailable)
-            .toList();
+        List<Seat> availableSeats = allSeats.stream().filter(Seat::getAvailable).toList();
+
+        // Kui filter 4 on sees ja seatCount > 1, siis otsime külgnevad istmed ette ära
+        List<Seat> adjacentSeats;
         if (filters.contains(4) && seatCount > 1) {
-            List<Seat> closestSeats = findExactAdjacentSeats(availableSeats, seatCount);
-            if (!closestSeats.isEmpty()) {
-                closestSeats.forEach(seat -> seat.setRecommended(true));
-            }
+            adjacentSeats = findExactAdjacentSeats(availableSeats, seatCount);
+        } else {
+            adjacentSeats = new ArrayList<>();
         }
+
         List<Seat> filteredSeats = availableSeats.stream()
-            .filter(seat -> !seat.getRecommended()) // Vältige juba soovitatud
             .filter(seat -> {
                 boolean matchesAllFilters = true;
+
+                // Filtrid 1, 2 ja 3 jäävad samaks
                 if (filters.contains(1)) {
                     matchesAllFilters &= (seat.getSeat_column().equals("A") || seat.getSeat_column().equals("H"));
                 }
                 if (filters.contains(2)) {
-                    List<String> exitRows = List.of("10", "4", "2", "6");
-                    List<String> exitCols = List.of("A", "B", "G", "H");
-                    matchesAllFilters &= (exitRows.contains(String.valueOf(seat.getRow())) &&
-                        exitCols.contains(seat.getSeat_column()));
+                    List<String> exitCols1 = List.of("A", "B", "G", "H");
+                    List<String> exitRow1 = List.of("C", "F");
+                    List<String> exitRows2 = List.of("4", "6", "10");
+                    List<String> exitCols2 = List.of("A", "B", "C", "F", "G", "H");
+
+                    matchesAllFilters &= (
+                        (seat.getRow() == 2 && exitCols1.contains(seat.getSeat_column())) ||
+                            (seat.getRow() == 1 && exitRow1.contains(seat.getSeat_column())) ||
+                            (exitRows2.contains(String.valueOf(seat.getRow())) && exitCols2.contains(seat.getSeat_column())) ||
+                            (seat.getRow() == 11 || seat.getRow() == 5)
+                    );
                 }
                 if (filters.contains(3)) {
-                    List<String> exitRows = List.of("10", "4", "2", "6");
-                    matchesAllFilters &= (exitRows.contains(String.valueOf(seat.getRow())) &&
-                        (seat.getSeat_column().equals("A") || seat.getSeat_column().equals("H")));
+                    matchesAllFilters &= (
+                        (seat.getRow() == 2 && List.of("A", "B", "G", "H").contains(seat.getSeat_column())) ||
+                            (seat.getRow() == 6 && List.of("A", "B", "C", "F", "G", "H").contains(seat.getSeat_column()))
+                    );
+                }
+                if (filters.contains(4) && seatCount > 1) {
+                    matchesAllFilters &= !adjacentSeats.isEmpty() && adjacentSeats.contains(seat);
                 }
 
                 return matchesAllFilters;
             })
             .toList();
-        filteredSeats.forEach(seat -> seat.setRecommended(true));
-        if (filteredSeats.size() < seatCount) {
-            int remainingSeatsCount = seatCount - filteredSeats.size();
-            List<Seat> remainingSeats = availableSeats.stream()
-                .limit(remainingSeatsCount)
-                .toList();
-            remainingSeats.forEach(seat -> seat.setRecommended(true));
-            List<Seat> updatedFilteredSeats = new ArrayList<>(filteredSeats);
-            updatedFilteredSeats.addAll(remainingSeats);
-            filteredSeats = updatedFilteredSeats;
-        }
-        seatRepository.saveAll(allSeats);
-        return filteredSeats.stream()
-            .map(seat -> SeatDTO.builder()
-                .id(seat.getId())
-                .row(seat.getRow())
-                .planeId(planeId)
-                .seat_column(seat.getSeat_column())
-                .recommended(true)
-                .available(true)
-                .build())
-            .limit(seatCount)
+        List<Seat> recommendedSeats = filteredSeats.stream().limit(seatCount).toList();
+        recommendedSeats.forEach(seat -> seat.setAvailable(true));
+        recommendedSeats.forEach(seat -> seat.setRecommended(true));
+        seatRepository.saveAll(recommendedSeats);
+        return recommendedSeats.stream()
+            .map(seatMapper::toDTO)
             .toList();
     }
+
 }
