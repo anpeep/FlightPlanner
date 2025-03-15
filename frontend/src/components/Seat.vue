@@ -46,3 +46,25 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+
+.seat {
+  width: 3vw;  /* Adjusted size for a better appearance */
+  height: 7vh;
+  cursor: pointer;
+  border-radius: 10px;  /* Rounded corners for a softer look */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);  /* Subtle shadow effect */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;  /* Smooth transition for hover effects */
+}
+
+.seat:hover {
+  transform: translateY(-5px);  /* Slight upward movement on hover */
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);  /* Deeper shadow effect */
+}
+
+.seat:active {
+  transform: translateY(1px);  /* Slight downward movement when clicked */
+}
+
+</style>

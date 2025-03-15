@@ -1,46 +1,113 @@
 <template>
-  <div class="search-container">
-    <h2>Search Flights</h2>
-
-    <div class="input-group">
-      <label>From:</label>
-      <input v-model="departureCity" placeholder="Departure City" />
+  <div class="sky-background">
+    <div class="clouds">
     </div>
 
-    <div class="input-group">
-      <label>To:</label>
-      <input v-model="arrivalCity" placeholder="Arrival City" />
-    </div>
+  <v-container class="search-container">
+    <v-card class="pa-5" elevation="10">
+      <v-card-title class="text-h5 text-center">Search Flights</v-card-title>
+      <v-card-text>
+        <v-row>
+          <v-col cols="12" md="6">
+            <v-text-field
+                v-model="departureCity"
+                label="From"
+                placeholder="Departure City"
+                outlined
+            ></v-text-field>
+          </v-col>
 
-    <div class="input-group">
-      <label>Tickets:</label>
-      <button @click="decreaseTicketCount">-</button>
-      <input v-model="ticketCount" type="number" min="1" readonly />
-      <button @click="increaseTicketCount">+</button>
-    </div>
+          <!-- Arrival City -->
+          <v-col cols="12" md="6">
+            <v-text-field
+                v-model="arrivalCity"
+                label="To"
+                placeholder="Arrival City"
+                outlined
+            ></v-text-field>
+          </v-col>
+        </v-row>
 
-    <div class="input-group">
-      <label>Select Date:</label>
-      <input type="date" v-model="selectedDate" />
-    </div>
+        <v-row>
+          <!-- Ticket Count -->
+          <v-col cols="12" md="6">
+            <v-text-field
+                v-model="ticketCount"
+                label="Tickets"
+                type="number"
+                min="1"
+                readonly
+                outlined
+            >
+              <template v-slot:append>
+                <!-- Suurenda nupp -->
+                <v-btn icon @click="increaseTicketCount" aria-label="Increase Ticket Count">
+                  + <!-- Plussmärk -->
+                </v-btn>
+              </template>
 
-    <h3 v-if="flights.length">Available Flights</h3>
-    <div class="flights-list" v-if="flights.length">
-      <div
-          v-for="flight in flights"
-          :key="flight.id"
-          @click="goToSeatSelection(flight)"
-          class="flight-card"
-          style="cursor: pointer;"
-      >
-        <strong>{{ flight.departureCity }} → {{ flight.arrivalCity }}</strong>
-        <div>🛫 Departure: {{ formatInstant(flight.departOn) }}</div>
-        <div>🛬 Arrival: {{ formatInstant(flight.arriveOn) }}</div>
-      </div>
-    </div>
+              <template v-slot:prepend>
+                <!-- Vähenda nupp -->
+                <v-btn icon @click="decreaseTicketCount" aria-label="Decrease Ticket Count">
+                  -
+                </v-btn>
+              </template>
+
+
+            </v-text-field>
+          </v-col>
+
+          <!-- Date Picker -->
+          <v-col cols="12" md="6">
+            <v-text-field
+                v-model="selectedDate"
+                label="Select Date"
+                type="date"
+                outlined
+            ></v-text-field>
+          </v-col>
+        </v-row>
+      </v-card-text>
+    </v-card>
+
+    <v-divider class="my-5"></v-divider>
+
+    <v-card v-if="flights.length" class="pa-5" elevation="5">
+      <v-card-title class="text-h6">Available Flights</v-card-title>
+      <v-list>
+        <v-list-item
+            v-for="flight in flights"
+            :key="flight.id"
+            @click="goToSeatSelection(flight)"
+            class="flight-card"
+            style="cursor: pointer; padding: 16px; border: 1px solid #e0e0e0; margin-bottom: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); background-color: #fff;"
+        >
+          <v-list-item-content>
+
+            <v-list-item-subtitle class="text-body-2" style="color: #152134;">
+              <v-row>
+                <!-- Vasakpoolne osa - Departure City ja Departure Time -->
+                <v-col cols="4" class="text-left">
+                  <strong>{{ flight.departureCity }}</strong>
+                  <div>{{ formatInstant(flight.departOn) }}</div>
+                </v-col>
+                <v-col cols="4" class="text-center">
+                  <div>{{ getFlightDuration(flight.departOn, flight.arriveOn) }}</div>
+                </v-col>
+                <v-col cols="4" class="text-right">
+                  <strong>{{ flight.arrivalCity }}</strong>
+                  <div>{{ formatInstant(flight.arriveOn) }}</div>
+                </v-col>
+              </v-row>
+            </v-list-item-subtitle>
+
+          </v-list-item-content>
+        </v-list-item>
+      </v-list>
+    </v-card>
+  </v-container>
   </div>
 </template>
-
 <script>
 import axios from "axios";
 import { useRouter } from 'vue-router';
@@ -87,6 +154,12 @@ export default {
   methods: {
     async searchFlights() {
       try {
+        // Kontrollige, et kõik parameetrid on täidetud ja et need ei ole tühikud
+        if (!this.selectedDate || !this.departureCity.trim() || !this.arrivalCity.trim()) {
+          console.log("❌ Missing parameters: Cannot search flights");
+          return;
+        }
+
         const response = await axios.post("/api/flight/generate", null, {
           params: {
             date: this.selectedDate,
@@ -94,6 +167,7 @@ export default {
             arrivalCity: this.arrivalCity,
           }
         });
+
         console.log(response.data);
 
         this.flights = response.data.map(flight => ({
@@ -118,8 +192,12 @@ export default {
     },
 
     increaseTicketCount() {
-      this.ticketCount++;
-      this.updateLocalStorage();
+      if (this.ticketCount < 72) {
+        this.ticketCount++;
+        this.updateLocalStorage();
+      } else {
+        console.log("❌ Ticket count cannot exceed 72");
+      }
     },
     decreaseTicketCount() {
       if (this.ticketCount > 1) {
@@ -130,6 +208,16 @@ export default {
 
     updateLocalStorage() {
       localStorage.setItem('ticketCount', this.ticketCount);
+    },
+    getFlightDuration(departureTime, arrivalTime) {
+      const departDate = new Date(departureTime);
+      const arriveDate = new Date(arrivalTime);
+
+      const durationInMinutes = (arriveDate - departDate) / 60000; // Arvutab kestuse minutites
+      const hours = Math.floor(durationInMinutes / 60); // Tunnid
+      const minutes = durationInMinutes % 60; // Minutid
+
+      return `${hours}h ${minutes}m`;
     },
 
     formatInstant(instant) {
@@ -145,3 +233,28 @@ export default {
   }
 };
 </script>
+<style scoped>
+.v-btn {
+  background-color: #D1EAF0;
+  color: #152134;
+  border-radius: 50%;
+}.sky-background {
+   position: fixed;
+   top: 0;
+   left: 0;
+   width: 100%;
+   height: 100%;
+   background: linear-gradient(90deg, #87CEEB, #B0E0E6); /* Taevasinine värv */
+   animation: skyAnimation 60s linear infinite;
+   z-index: -1; /* Tagumine kiht */
+ }
+
+/* Sisu peale */
+.search-container {
+  position: relative;
+  z-index: 1;
+  overflow: hidden; /* Tagame, et sisu jääks ekraanile */
+  width: 900%;
+}
+
+</style>

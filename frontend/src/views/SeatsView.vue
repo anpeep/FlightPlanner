@@ -16,6 +16,9 @@
         </div>
       </div>
     </div>
+    <div class="airplane-body">
+      <img src="../assets/airplane.png" alt="Airplane Body" class="airplane-image" />
+    </div>
   </div>
 </template>
 
@@ -62,20 +65,10 @@ export default {
     generateSeats() {
       const seatMap = new Map(this.bookedSeats.map(seat => [`${seat.row}${seat.seat_column}`, true]));
       const recommendedSeatMap = new Map(this.recommendedSeats.map(seat => [`${seat.row}${seat.seat_column}`, true]));
-      this.seats = Array.from({ length: 11 }, (_, index) => {
-        const row = index + 1;
-        let seatPositions = row === 1 ? ["C", "D", "E", "F"] :
-            (row === 5 || row === 11) ? ["D", "E"] :
-                ["A", "B", "C", "D", "E", "F", "G", "H"];
-        return {
-          row,
-          seats: seatPositions.map(pos => ({
-            position: pos,
-            booked: seatMap.has(`${row}${pos}`),
-            recommended: recommendedSeatMap.has(`${row}${pos}`),
-          })),
-        };
+
+      this.seats = Array.from({ length: seatM }, (_, index) => {
       });
+
     },
     swapSeats(fromSeat, toSeat) {
       let fromSeatObj = null;
@@ -96,3 +89,24 @@ export default {
   },
 };
 </script>
+<style scoped>
+
+.airplane-body {
+  top: 30vh;
+  position: absolute;
+  right: 18vw;  /* Paigutab lennuki keha paremasse nurka */
+  transform: translate(50%, -50%); /* Korrigeerib keha positsiooni täpselt */
+}
+
+.airplane-image {
+  width: 100%;
+  max-width: 40vw;
+}
+
+.row {
+  display: flex;
+  justify-content: center;
+}
+
+
+</style>

@@ -1,6 +1,7 @@
 package com.example.test.service;
 
 import com.example.test.dto.SeatDTO;
+import com.example.test.mapping.SeatMapper;
 import com.example.test.model.Plane;
 import com.example.test.model.Seat;
 import com.example.test.model.Ticket;
@@ -20,6 +21,7 @@ public class SeatService {
 
     private final SeatRepository seatRepository;
     private final PlaneRepository planeRepository;
+    private final SeatMapper seatMapper;
     private final Random random = new Random();
 
     public List<SeatDTO> generateAndRecommendSeats(Integer seatCount, Integer planeId, Integer flightId) {
@@ -28,10 +30,8 @@ public class SeatService {
 
         if (seatRepository.countByPlaneId(planeId) == 0) {
             List<Seat> newSeats = new ArrayList<>();
-            int totalRows = 11;
-            int totalColumns = 8;
 
-            for (int row = 1; row <= totalRows; row++) {
+            for (int row = 1; row <= 11; row++) {
                 List<String> seatPositions = switch (row) {
                     case 1 -> List.of("C", "D", "E", "F");
                     case 5, 11 -> List.of("D", "E");
@@ -49,10 +49,13 @@ public class SeatService {
                 }
             }
 
-            int totalSeats = totalRows * totalColumns;
+            int totalSeats = 72;
             int bookedSeatsCount = random.nextInt(totalSeats - seatCount);
+            System.out.println(totalSeats);
+            System.out.println(seatCount);
             Collections.shuffle(newSeats);
-
+            System.out.println(bookedSeatsCount);
+            System.out.println(newSeats.size());
             for (int i = 0; i < bookedSeatsCount; i++) {
                 newSeats.get(i).setAvailable(false);
             }
@@ -74,15 +77,7 @@ public class SeatService {
         // Ainult seatCount arv soovitusi
 
         return availableSeats.stream()
-            .map(seat -> SeatDTO.builder()
-                .id(seat.getId())
-                .row(seat.getRow())
-                .planeId(seat.getPlane().getId())
-                .seat_column(seat.getSeat_column())
-                .available(true)
-                .recommended(seat.getRecommended())  // Ainult seatCount arv soovitusi
-                .build())
-            .toList();
+            .map(seatMapper::toDTO).toList();
     }
 
     private List<Seat> findExactAdjacentSeats(List<Seat> availableSeats, int seatCount) {
@@ -114,19 +109,14 @@ public class SeatService {
     public Map<String, List<SeatDTO>> getSeatsByFlight(Integer flightId, Integer planeId) {
         List<Seat> allSeats = seatRepository.findByPlaneId(planeId);
         List<SeatDTO> seatDTOS = allSeats.stream()
-            .map(seat -> SeatDTO.builder()
-                .id(seat.getId())
-                .row(seat.getRow())
-                .planeId(seat.getPlane().getId())
-                .seat_column(seat.getSeat_column())
-                .available(seat.getAvailable())
-                .recommended(seat.getRecommended())
-                .build())
-            .toList();
+            .map(seatMapper::toDTO).toList();
         Map<String, List<SeatDTO>> seatGroups = new HashMap<>();
+
+
         seatGroups.put("availableSeats", seatDTOS.stream().filter(seat -> seat.getAvailable() && !seat.getRecommended()).toList());
         seatGroups.put("bookedSeats", seatDTOS.stream().filter(seat -> !seat.getAvailable()).toList());
         seatGroups.put("recommendedSeats", seatDTOS.stream().filter(SeatDTO::getRecommended).toList());
+        System.out.println(seatGroups.get("recommendedSeats" ));
         return seatGroups;
     }
 

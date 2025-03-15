@@ -28,7 +28,7 @@ public class FlightService {
     public List<FlightDTO> updateFlightCities(LocalDate date, String departureCity, String arrivalCity) {
         Plane plane = planeRepository.save(new Plane()); // Create & Save Plane First
 
-        int flightCount = random.nextInt(3) + 3;
+        int flightCount = random.nextInt(2) + 2;
         List<Flight> flights = new ArrayList<>();
         ZoneId zoneId = ZoneId.systemDefault();
         Instant baseDepartOn = date.atStartOfDay(zoneId).toInstant();
@@ -40,17 +40,16 @@ public class FlightService {
             flight.setDepartureCity(departureCity);
             flight.setArrivalCity(arrivalCity);
             plane.setId(plane.getId());
-            flight.setPlane(plane); // Seome lennuki lennuga
+            flight.setPlane(plane);
             flights.add(flight);
         }
         plane.setFlights(flights);
-        flightRepository.saveAll(flights); // Salvesta lennud
+        flightRepository.saveAll(flights);
 
         List<FlightDTO> d = flights.stream()
             .map(flightMapper::toDTO)
             .toList();
 
-// Ensure planeId is set properly
         return d.stream()
             .peek(a -> {
                 a.setPlaneId(plane.getId());
