@@ -115,7 +115,7 @@ export default {
         },
       });
       router.push({
-        path: "/seat",
+        path: "/seats",
         query: {
           flightId: flight.id,
           planeId: flight.planeId,

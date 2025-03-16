@@ -2,6 +2,7 @@
   <div class="side-panel">
     <h3>Filters</h3>
 
+    <!-- Filters Section -->
     <div class="filter">
       <input type="checkbox" id="window" v-model="filters.window" @change="applyFilters" />
       <label for="window">Window Seat</label>
@@ -22,116 +23,119 @@
       <label for="near">Near Seats</label>
     </div>
 
-    <v-col cols="12" md="6">
-      <v-text-field
-          v-model="seatCount"
-          label="Tickets"
-          type="number"
-          min="1"
-          readonly
-          outlined
-      >
-        <template v-slot:append>
-          <!-- Increase button -->
-          <v-btn icon @click="increaseSeatCount" aria-label="Increase Ticket Count">
-            + <!-- Plus sign -->
-          </v-btn>
-        </template>
+    <v-row class="align-center" justify="center">
+      <v-col cols="3" md="3">
+        <v-btn icon @click="decreaseSeat">
+          -
+        </v-btn>
+      </v-col>
 
-        <template v-slot:prepend>
-          <!-- Decrease button -->
-          <v-btn icon @click="decreaseSeatCount" aria-label="Decrease Ticket Count">
-            - <!-- Minus sign -->
-          </v-btn>
-        </template>
-      </v-text-field>
-    </v-col>
+      <v-col cols="3" md="5">
+        <v-text-field
+            v-model="seatCount"
+            label="Filter for"
+            type="number"
+            min="1"
+            readonly
+            outlined
+            class="ticket-field"
+        >
+        </v-text-field>
+      </v-col>
+
+      <v-col cols="3" md="3">
+        <v-btn icon @click="increaseSeat">
+          +
+        </v-btn>
+      </v-col>
+    </v-row>
   </div>
 </template>
-
 <script>
 import axios from "axios";
+import { decreaseSeatCount, increaseSeatCount, updateLocalStorage } from "@/utils.js";
 
 export default {
-  data() {
-    return {
-      filters: {
-        window: false,
-        exit: false,
-        legroom: false,
-        near: false,
-      },
-      seatCount: localStorage.getItem('seatCount') ? parseInt(localStorage.getItem('seatCount')) : 1, // Load from localStorage
-      seats: [], // Stores all the seats
-    };
-  },
+data() {
+return {
+filters: {
+window: false,
+exit: false,
+legroom: false,
+near: false,
+},
+seatCount: localStorage.getItem('seatCount') ? parseInt(localStorage.getItem('seatCount')) : 1, // Load from localStorage
+seats: [],
+};
+},
 
-  methods: {
-    async applyFilters() {
-      console.log("Applying filters...");
-      try {
-        const filters = [];
-        if (this.filters.window) filters.push(1);
-        if (this.filters.exit) filters.push(2);
-        if (this.filters.legroom) filters.push(3);
-        if (this.filters.near) filters.push(4);
+watch: {
+seatCount(newSeatCount) {
+this.applyFilters();
+}
+},
 
-        // If no filters are selected, skip the API call
-        if (filters.length === 0) {
-          console.log("No filters selected, skipping API request.");
-          return;
-        }
+mounted() {
+this.loadFiltersFromLocalStorage();
+},
 
-        const flightId = this.$route.query.flightId;
-        const planeId = this.$route.query.planeId;
-        const seatCount = this.seatCount;
+methods: {
+// Save filters to localStorage when they change
+applyFilters() {
+try {
+// Save filter states to localStorage
+localStorage.setItem('filters', JSON.stringify(this.filters));
 
-        const response = await axios.post("/api/seats/addFilters", filters, {
-          params: {
-            seatCount: seatCount,
-            flightId: flightId,
-            planeId: planeId,
-          },
-        });
-        this.$emit("filtersUpdated", response.data);
-      } catch (error) {
-        console.error("❌ Error applying filters:", error.response?.data || error.message);
-      }
-    },
+const filters = [];
+if (this.filters.window) filters.push(1);
+if (this.filters.exit) filters.push(2);
+if (this.filters.legroom) filters.push(3);
+if (this.filters.near) filters.push(4);
+if (filters.length === 0) {
+return;
+}
 
-    updateSeats(filteredSeats) {
-      // Process and update the seats based on filtered data
-      this.seats = filteredSeats;
+const flightId = this.$route.query.flightId;
+const planeId = this.$route.query.planeId;
 
-      // Log or inspect the updated seats array
-      console.log("Updated seats:", this.seats);
-    },
+const response = axios.post("/api/seats/addFilters", filters, {
+params: {
+seatCount: this.seatCount,
+flightId: flightId,
+planeId: planeId,
+},
+});
+this.$emit("filtersUpdated", response.data);
+} catch (error) {
+console.error("❌ Error applying filters:", error.response?.data || error.message);
+}
+},
 
-    increaseSeatCount() {
-      if (this.seatCount < 72) {
-        this.seatCount++;
-        this.updateLocalStorage();
+// Load filters from localStorage when the page is loaded
+loadFiltersFromLocalStorage() {
+const savedFilters = localStorage.getItem('filters');
+if (savedFilters) {
+this.filters = JSON.parse(savedFilters);
+}
+},
 
-      } else {
-        console.log("❌ Ticket count cannot exceed 72");
-      }
-    },
+// Decrease seat count
+decreaseSeat() {
+this.seatCount = decreaseSeatCount(this.seatCount, updateLocalStorage, this.applyFilters);
+},
 
-    decreaseSeatCount() {
-      if (this.seatCount > 1) {
-        this.seatCount--;
-        this.updateLocalStorage();
+// Increase seat count
+increaseSeat() {
+this.seatCount = increaseSeatCount(this.seatCount, updateLocalStorage, this.applyFilters);
+},
 
-      }
-    },
-  },
-
-  updateLocalStorage() {
-    localStorage.setItem('seatCount', this.seatCount);
-  },
+onSeatCountUpdated(newCount) {
+this.seatCount = newCount;
+this.applyFilters();
+},
+},
 };
 </script>
-
 <style scoped>
 .side-panel {
   background-color: #f9f9f9;
@@ -192,5 +196,16 @@ export default {
 .side-panel:hover {
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
   transform: translateY(-5px);
+}
+.ticket-field {
+  width: 100%; /* Ensure the text field takes up the full width of the column */
+}
+
+.v-btn.icon {
+  min-width: 30px; /* Ensure buttons have a minimum size */
+}
+
+.v-col {
+  max-width: 400px; /* Ensures the ticket field doesn't become too large */
 }
 </style>

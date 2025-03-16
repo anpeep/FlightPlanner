@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import SeatsView from '../views/SeatsView.vue';
-import SearchView from "../views/SearchView.vue";
 import StartView from "../views/StartView.vue";
 import FlightsView from "../views/FlightsView.vue";
 
@@ -8,7 +7,7 @@ const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes: [
         {
-            path: '/seat',
+            path: '/seats',
             name: 'seats',
             component: SeatsView,
         },
@@ -16,11 +15,6 @@ const router = createRouter({
             path: '/flights',
             name: 'flights',
             component: FlightsView,
-        },
-        {
-            path: '/search',
-            name: 'search',
-            component: SearchView,
         },
         {
             path: '/',

@@ -1,28 +1,41 @@
 <template>
-  <div v-if="recommendedSeats.length" class="ticket-panel">
-    <h3>Flight Details</h3>
-    <ul>
-      <li><strong>Departure City:</strong> {{ departureCity }}</li>
-      <li><strong>Arrival City:</strong> {{ arrivalCity }}</li>
-      <li><strong>Flight Date:</strong> {{ formatDate(departOn) }}</li>
-      <li><strong>Seat Count:</strong> {{ seatCount }}</li>
-      <li><strong>Flight ID:</strong> {{ flightId }}</li>
-      <li><strong>Plane ID:</strong> {{ planeId }}</li>
-      <li><strong>Price:</strong> €{{ price }}</li>
-      <li><strong>From Date:</strong> {{ formatTime(departOn) }}</li>
-      <li><strong>To Date:</strong> {{ formatTime(arriveOn) }}</li>
-    </ul>
-  </div>
+  <v-card v-if="recommendedSeats.length" class="ticket-panel" max-width="400">
+    <v-card-title class="text-h8 font-weight-bold">
+      Flight Details
+    </v-card-title>
+    <v-skeleton-loader v-if="loading" type="card"></v-skeleton-loader>
+
+    <v-list v-else>
+      <v-list-item v-for="(item, index) in flightDetails" :key="index">
+        <v-list-item-content>
+          <v-list-item-title>
+            <span class="font-weight-bold">{{ item.label }}:</span> {{ item.value }}
+          </v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
+      <v-card-text>
+        Flight Duration: {{ calculateFlightDuration(departOn, arriveOn) }}
+      </v-card-text>
+    </v-list>
+
+    <v-divider></v-divider>
+
+    <v-btn class="mt-4" color="primary" block @click="confirmBooking">
+      Confirm Booking
+    </v-btn>
+  </v-card>
 </template>
 
 <script>
-import { useRouter } from "vue-router";
-import axios from "axios";
+import { useRouter } from 'vue-router';
+import axios from 'axios';
+import SeatsView from "@/views/SeatsView.vue";
+import { getFlightDuration } from "@/utils.js";
+import { increaseSeatCount, decreaseSeatCount, updateLocalStorage } from "@/utils.js";  // Assuming these are in utils.js
 
 export default {
   data() {
     return {
-      // Define data properties
       departureCity: "",
       arrivalCity: "",
       selectedDate: "",
@@ -33,6 +46,8 @@ export default {
       departOn: "",
       arriveOn: "",
       recommendedSeats: [], // Add this to store the recommended seats
+      loading: false, // Add loading state
+      flightDetails: [], // Holds flight data in an array
     };
   },
   mounted() {
@@ -41,12 +56,16 @@ export default {
     if (storedRecommendedSeats) {
       this.recommendedSeats = JSON.parse(storedRecommendedSeats);
     }
-
-    // Fetch flight details from API or wherever you are getting these values from
     this.fetchFlightDetails();
+
   },
   methods: {
+    calculateFlightDuration(departureTime, arrivalTime) {
+      return getFlightDuration(departureTime, arrivalTime);
+    },
     async fetchFlightDetails() {
+      this.loading = true; // Start loading
+
       try {
         const response = await axios.get("/api/flight/details", {
           params: {
@@ -54,26 +73,74 @@ export default {
             planeId: this.planeId,
           }
         });
+
+
         const flightData = response.data;
+        console.log(flightData.selectedDate);
         this.departureCity = flightData.departureCity;
         this.arrivalCity = flightData.arrivalCity;
-        this.selectedDate = flightData.selectedDate;
+        this.selectedDate = flightData.selectedDate; // This should now be a valid date string
         this.price = flightData.price;
         this.departOn = flightData.departOn;
         this.arriveOn = flightData.arriveOn;
+        this.selectedDateFormatted = this.formatDate(this.selectedDate);
+
+        this.flightDetails = [
+          { label: 'From', value: this.departureCity },
+          { label: 'To', value: this.arrivalCity },
+          { label: 'Take off', value: this.formatTime(this.departOn) },
+          { label: 'Landing', value: this.formatTime(this.arriveOn) },
+        ];
       } catch (error) {
         console.error("Error fetching flight details:", error);
+      } finally {
+        this.loading = false; // Stop loading
       }
     },
-    formatTime(date) {
-      // Kuvab ainult kellaaega (HH:mm:ss formaadis)
-      const d = new Date(date);
-      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    increaseSeat() {
+      this.seatCount = increaseSeatCount(this.seatCount, updateLocalStorage, this.applyFilters);
+      this.updateFlightDetails(); // Recalculate flight details
+    },
+
+    // Decrease seat count
+    decreaseSeat() {
+      this.seatCount = decreaseSeatCount(this.seatCount, updateLocalStorage, this.applyFilters);
+      this.updateFlightDetails(); // Recalculate flight details
+    },
+    updateFlightDetails() {
+      this.flightDetails = [
+        { label: 'From', value: this.departureCity },
+        { label: 'To', value: this.arrivalCity },
+        { label: 'On', value: this.formatDate(this.selectedDate) },
+        { label: 'Seat Count', value: this.seatCount },
+        { label: 'Price', value: `€${(this.price * this.seatCount).toFixed(2)}` },
+        { label: 'Take off', value: this.formatTime(this.departOn) },
+        { label: 'Landing', value: this.formatTime(this.arriveOn) },
+      ];
     },
     formatDate(date) {
-      // Kuvab kuupäeva kuu ja kuupäevaga (kuu-päev-aasta formaadis)
       const d = new Date(date);
-      return d.toLocaleDateString([], { year: 'numeric', month: 'long', day: 'numeric' });
+      const options = {
+        year: '4-digit',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      };
+      return d.toLocaleString('en-GB', options).replace(',', ''); // Saadab kuupäeva nagu 01/04/2025, 09:34:05
+    },
+
+    formatTime(date) {
+      const d = new Date(date);
+      return d.toLocaleTimeString([], {         month: '2-digit',
+        day: '2-digit',hour: '2-digit', minute: '2-digit' });
+    },
+
+    // Updated confirmBooking method to display the price and seat count in alert
+    confirmBooking() {
+      const totalPrice = (this.price * parseInt(localStorage.getItem('seatCount')));
+      alert(`Booking Confirmed! See you on boarding!\nSeats: ${this.seatCount}\nTotal Price: €${totalPrice}`);
     }
   }
 };
@@ -81,35 +148,16 @@ export default {
 
 
 <style scoped>
-.ticket-panel {
-  background-color: #f9f9f9;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  max-width: 350px;
-  margin-left: 20px;
-  flex-shrink: 0;
-}
 
-.ticket-panel h3 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 15px;
-}
 
-.ticket-panel ul {
-  list-style-type: none;
-  padding-left: 0;
-}
-
-.ticket-panel li {
-  font-size: 1rem;
+.ticket-panel .v-list-item-title {
+  font-size: 1.1rem;
   color: #555;
-  margin-bottom: 10px;
 }
 
-.ticket-panel li:last-child {
-  margin-bottom: 0;
+.ticket-panel .v-btn {
+  font-size: 1rem;
+  font-weight: bold;
 }
+
 </style>
