@@ -1,10 +1,10 @@
 <script setup>
-import { ref } from "vue";
+import {ref} from "vue";
 
 const seatLegend = ref([
-  { color: "green", label: "Available" },
-  { color: "yellow", label: "Recommended" },
-  { color: "red", label: "Booked" }
+  {color: "green", label: "Available"},
+  {color: "yellow", label: "Recommended"},
+  {color: "red", label: "Booked"}
 ]);
 </script>
 
@@ -12,16 +12,16 @@ const seatLegend = ref([
   <v-card class="legend-card pa-1">
     <v-card-title class="text-h9 text-center">Seat Selection Guide</v-card-title>
 
-    <v-row align="center" justify="center" class="legend-container">
-      <v-col v-for="item in seatLegend" :key="item.label" cols="auto" class="d-flex align-center">
-        <v-avatar size="14" :color="item.color" class="mr-2"></v-avatar>
+    <v-row align="center" class="legend-container" justify="center">
+      <v-col v-for="item in seatLegend" :key="item.label" class="d-flex align-center" cols="auto">
+        <v-avatar :color="item.color" class="mr-2" size="14"></v-avatar>
         <span>{{ item.label }}</span>
       </v-col>
     </v-row>
 
     <v-card-text class="text-center text-body-5">
-      Toggle an available seat to select it, or use filters to see recommended options.
-      Adjust your ticket count to choose more seats!
+      Filters to see how many superior available seats are there or just toggle on the green one of your choice.
+      Don't forget to adjust your ticket count accordingly!
     </v-card-text>
   </v-card>
 </template>

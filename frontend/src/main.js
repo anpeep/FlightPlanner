@@ -1,15 +1,15 @@
-import { createApp } from 'vue'
+import {createApp} from 'vue'
 import App from './App.vue'
 import router from './router'
 import VueAxios from 'vue-axios'
 import axios from "axios"
 
 // ✅ Impordi Vuetify ja vajalikud komponendid
-import { createVuetify } from 'vuetify'
+import {createVuetify} from 'vuetify'
 import 'vuetify/styles'
 import * as components from 'vuetify/components' // 🔹 Lisa kõik komponendid
 import * as directives from 'vuetify/directives' // 🔹 Lisa direktiivid
-import { aliases, mdi } from 'vuetify/iconsets/mdi' // 🔹 Lisa ikoonid
+import {aliases, mdi} from 'vuetify/iconsets/mdi' // 🔹 Lisa ikoonid
 
 const vuetify = createVuetify({
     components,
@@ -17,7 +17,7 @@ const vuetify = createVuetify({
     icons: {
         defaultSet: 'mdi',
         aliases,
-        sets: { mdi },
+        sets: {mdi},
     },
 })
 

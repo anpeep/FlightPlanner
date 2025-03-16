@@ -2,24 +2,23 @@
   <div class="side-panel">
     <h3>Filters</h3>
 
-    <!-- Filters Section -->
     <div class="filter">
-      <input type="checkbox" id="window" v-model="filters.window" @change="applyFilters" />
+      <input id="window" v-model="filters.window" type="checkbox" @change="applyFilters"/>
       <label for="window">Window Seat</label>
     </div>
 
     <div class="filter">
-      <input type="checkbox" id="exit" v-model="filters.exit" @change="applyFilters" />
+      <input id="exit" v-model="filters.exit" type="checkbox" @change="applyFilters"/>
       <label for="exit">Near Exit</label>
     </div>
 
     <div class="filter">
-      <input type="checkbox" id="legroom" v-model="filters.legroom" @change="applyFilters" />
+      <input id="legroom" v-model="filters.legroom" type="checkbox" @change="applyFilters"/>
       <label for="legroom">More Legroom</label>
     </div>
 
     <div class="filter">
-      <input type="checkbox" id="near" v-model="filters.near" @change="applyFilters" />
+      <input id="near" v-model="filters.near" type="checkbox" @change="applyFilters"/>
       <label for="near">Near Seats</label>
     </div>
 
@@ -33,12 +32,12 @@
       <v-col cols="3" md="5">
         <v-text-field
             v-model="seatCount"
-            label="Filter for"
-            type="number"
-            min="1"
-            readonly
-            outlined
             class="ticket-field"
+            label="Tickets"
+            min="1"
+            outlined
+            readonly
+            type="number"
         >
         </v-text-field>
       </v-col>
@@ -53,87 +52,75 @@
 </template>
 <script>
 import axios from "axios";
-import { decreaseSeatCount, increaseSeatCount, updateLocalStorage } from "@/utils.js";
+import {decreaseSeatCount, increaseSeatCount, updateLocalStorage} from "@/utils.js";
 
 export default {
-data() {
-return {
-filters: {
-window: false,
-exit: false,
-legroom: false,
-near: false,
-},
-seatCount: localStorage.getItem('seatCount') ? parseInt(localStorage.getItem('seatCount')) : 1, // Load from localStorage
-seats: [],
-};
-},
+  data() {
+    return {
+      filters: {
+        window: false,
+        exit: false,
+        legroom: false,
+        near: false,
+      },
+      seatCount: localStorage.getItem('seatCount') ? parseInt(localStorage.getItem('seatCount')) : 1,
+      seats: [],
+    };
+  },
 
-watch: {
-seatCount(newSeatCount) {
-this.applyFilters();
-}
-},
+  watch: {
+    seatCount() {
+      this.applyFilters();
+    }
+  },
 
-mounted() {
-this.loadFiltersFromLocalStorage();
-},
+  mounted() {
+    this.loadFiltersFromLocalStorage();
+  },
 
-methods: {
-// Save filters to localStorage when they change
-applyFilters() {
-try {
-// Save filter states to localStorage
-localStorage.setItem('filters', JSON.stringify(this.filters));
+  methods: {
+    applyFilters() {
+      try {
+        localStorage.setItem('filters', JSON.stringify(this.filters));
+        const filters = [];
+        if (this.filters.window) filters.push(1);
+        if (this.filters.exit) filters.push(2);
+        if (this.filters.legroom) filters.push(3);
+        if (this.filters.near) filters.push(4);
+        if (filters.length === 0) {
+          return;
+        }
 
-const filters = [];
-if (this.filters.window) filters.push(1);
-if (this.filters.exit) filters.push(2);
-if (this.filters.legroom) filters.push(3);
-if (this.filters.near) filters.push(4);
-if (filters.length === 0) {
-return;
-}
+        const flightId = this.$route.query.flightId;
+        const planeId = this.$route.query.planeId;
 
-const flightId = this.$route.query.flightId;
-const planeId = this.$route.query.planeId;
+        const response = axios.post("/api/seats/addFilters", filters, {
+          params: {
+            seatCount: this.seatCount,
+            flightId: flightId,
+            planeId: planeId,
+          },
+        });
+        this.$emit("filtersUpdated", response.data);
+      } catch (error) {
+        console.error("❌ Error applying filters:", error.response?.data || error.message);
+      }
+    },
 
-const response = axios.post("/api/seats/addFilters", filters, {
-params: {
-seatCount: this.seatCount,
-flightId: flightId,
-planeId: planeId,
-},
-});
-this.$emit("filtersUpdated", response.data);
-} catch (error) {
-console.error("❌ Error applying filters:", error.response?.data || error.message);
-}
-},
+    loadFiltersFromLocalStorage() {
+      const savedFilters = localStorage.getItem('filters');
+      if (savedFilters) {
+        this.filters = JSON.parse(savedFilters);
+      }
+    },
+    decreaseSeat() {
+      this.seatCount = decreaseSeatCount(this.seatCount, updateLocalStorage, this.applyFilters);
+    },
 
-// Load filters from localStorage when the page is loaded
-loadFiltersFromLocalStorage() {
-const savedFilters = localStorage.getItem('filters');
-if (savedFilters) {
-this.filters = JSON.parse(savedFilters);
-}
-},
-
-// Decrease seat count
-decreaseSeat() {
-this.seatCount = decreaseSeatCount(this.seatCount, updateLocalStorage, this.applyFilters);
-},
-
-// Increase seat count
-increaseSeat() {
-this.seatCount = increaseSeatCount(this.seatCount, updateLocalStorage, this.applyFilters);
-},
-
-onSeatCountUpdated(newCount) {
-this.seatCount = newCount;
-this.applyFilters();
-},
-},
+    increaseSeat() {
+      this.seatCount = increaseSeatCount(this.seatCount, updateLocalStorage, this.applyFilters);
+    },
+  },
 };
 </script>
 <style scoped>
@@ -192,20 +179,20 @@ this.applyFilters();
   margin-bottom: 0;
 }
 
-/* Apply a subtle hover effect on the side panel */
 .side-panel:hover {
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
   transform: translateY(-5px);
 }
+
 .ticket-field {
-  width: 100%; /* Ensure the text field takes up the full width of the column */
+  width: 100%;
 }
 
 .v-btn.icon {
-  min-width: 30px; /* Ensure buttons have a minimum size */
+  min-width: 30px;
 }
 
 .v-col {
-  max-width: 400px; /* Ensures the ticket field doesn't become too large */
+  max-width: 400px;
 }
 </style>

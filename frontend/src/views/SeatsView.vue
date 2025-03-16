@@ -1,59 +1,50 @@
 <template>
-  <v-container fluid class="seating-container">
-    <v-row justify="center" align="start" class="main-content">
-      <!-- Left Sidebar: Recommendations -->
-      <v-col cols="3" class="side-panel">
-        <RecsPanel @filtersUpdated="updateSeats" />
+  <v-container class="seating-container" fluid>
+    <v-row align="start" class="main-content" justify="center">
+      <v-col class="side-panel" cols="3">
+        <RecsPanel @filtersUpdated="updateSeats"/>
       </v-col>
-
-      <!-- Middle: Seating Layout -->
-
-      <v-col cols="6" class="seat-layout">
+      <v-col class="seat-layout" cols="6">
 
         <div v-for="(row, rowIndex) in seats" :key="rowIndex" class="seat-row">
-          <!-- Left Group -->
           <div class="seat-group left-group">
             <Seat
                 v-for="(seat, seatIndex) in row.seats.filter(s => ['A', 'B', 'C', 'D'].includes(s.position))"
                 :key="seatIndex"
-                :number="seat.position"
                 :isBooked="seat.booked"
                 :isRecommended="seat.recommended"
+                :number="seat.position"
                 class="seat-item"
-                @swapSeats="swapSeats"
                 @seatCountUpdated="updateSeatCount"
+                @swapSeats="swapSeats"
             />
           </div>
 
-          <!-- Aisle -->
           <div class="aisle"></div>
 
-          <!-- Right Group -->
           <div class="seat-group right-group">
             <Seat
                 v-for="(seat, seatIndex) in row.seats.filter(s => ['E', 'F', 'G', 'H'].includes(s.position))"
                 :key="seatIndex"
-                :number="seat.position"
                 :isBooked="seat.booked"
                 :isRecommended="seat.recommended"
+                :number="seat.position"
                 class="seat-item"
-                @swapSeats="swapSeats"
                 @seatCountUpdated="updateSeatCount"
+                @swapSeats="swapSeats"
             />
           </div>
         </div>
       </v-col>
 
-      <!-- Right Sidebar: Ticket Panel -->
-      <v-col cols="3" class="side-panel">
-        <TicketPanel />
+      <v-col class="side-panel" cols="3">
+        <TicketPanel/>
       </v-col>
     </v-row>
 
-    <!-- Bottom Row: Legend -->
-    <v-row justify="center" class="legend-row">
+    <v-row class="legend-row" justify="center">
       <v-col cols="6">
-        <Legend />
+        <Legend/>
       </v-col>
     </v-row>
   </v-container>
@@ -67,7 +58,7 @@ import TicketPanel from "@/components/TicketPanel.vue";
 import Legend from "@/components/Legend.vue";
 
 export default {
-  components: {TicketPanel, Seat, RecsPanel, Legend },
+  components: {TicketPanel, Seat, RecsPanel, Legend},
   data() {
     return {
       seats: [],
@@ -82,7 +73,7 @@ export default {
   methods: {
     async loadSeats() {
       try {
-        const response = await axios.get("/api/seats/getSeatsByFlight", {
+        const response = await axios.get("/api/seats", {
           params: {
             flightId: this.$route.query.flightId,
             planeId: this.$route.query.planeId,
@@ -108,7 +99,7 @@ export default {
       const recommendedSeatMap = new Map(this.recommendedSeats.map(seat => [`${seat.row}${seat.seat_column}`, true])); // Muuda väärtuseks true
       const totalRows = 11;
 
-      this.seats = Array.from({ length: totalRows }, (_, rowIndex) => {
+      this.seats = Array.from({length: totalRows}, (_, rowIndex) => {
         const row = rowIndex + 1;
         let seatPositions;
 
@@ -161,33 +152,28 @@ export default {
 </script>
 <style scoped>
 .seating-container {
-background: linear-gradient(to bottom, #6FA1FF, #87BFFF, #A3CDFF, #BEDCFF);
-height: 100vh; /* Full-page height */
+  background: linear-gradient(to bottom, #6FA1FF, #87BFFF, #A3CDFF, #BEDCFF);
+  height: 100vh;
 }
 
-/* Flexbox for Row Layout */
 .main-content {
-display: flex;
-align-items: flex-start;
+  display: flex;
+  align-items: flex-start;
 }
 
-/* Seat Groups */
 .seat-row {
-display: flex;
-align-items: center;
-justify-content: center;
-margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
 }
 
 .seat-group {
-display: flex;
-gap: 1vh;
+  display: flex;
+  gap: 1vh;
 }
 
-/* The aisle space */
 .aisle {
-width: 5vh; /* Space between seat groups */
+  width: 5vh;
 }
-
-
 </style>

@@ -2,94 +2,95 @@
   <v-container>
 
     <v-row>
-      <v-col cols="4" md="4" class="mb-4">
+      <v-col class="mb-4" cols="4" md="4">
         <v-text-field
             v-model="filters.startDate"
+            color="primary"
+            dense
             label="Search From Date"
+            outlined
             type="date"
             @input="applyFilters"
-            outlined
-            dense
-            color="primary"
         ></v-text-field>
       </v-col>
       <v-col cols="4">
         <h3 class="text-center mt-5">Choose Details</h3>
       </v-col>
-      <v-col cols="4" md="4" class="mb-4">
+      <v-col class="mb-4" cols="4" md="4">
         <v-text-field
             v-model="filters.endDate"
+            color="primary"
+            dense
             label="To Date"
+            outlined
             type="date"
             @input="applyFilters"
-            outlined
-            dense
-            color="primary"
         ></v-text-field>
       </v-col>
-      </v-row>
+    </v-row>
 
     <v-row>
-      <v-col cols="4" md="4" class="mb-4">
+      <v-col class="mb-4" cols="4" md="4">
         <v-text-field
             v-model="filters.departureCity"
+            dense
             label="Departure City"
             outlined
-            dense
         />
       </v-col>
 
-      <v-col cols="12" md="4" class="mb-4">
-        <v-col cols="12" class="text-left">
+      <v-col class="mb-4" cols="12" md="4">
+        <v-col class="text-left" cols="12">
           <span>{{ Math.round(filters.priceRange[0]) }} €</span>
         </v-col>
         <v-range-slider
             v-model="filters.priceRange"
-            :min="minPrice"
             :max="maxPrice"
+            :min="minPrice"
             :step="10"
-            thumb-label
             :thumb-size="24"
             class="price-slider"
+            thumb-label
         />
-        <v-col cols="12" class="text-right">
+        <v-col class="text-right" cols="12">
           <span>{{ Math.round(filters.priceRange[1]) }} €</span>
         </v-col>
 
       </v-col>
-      <v-col cols="4" md="4" class="mb-4">
+      <v-col class="mb-4" cols="4" md="4">
         <v-text-field
             v-model="filters.arrivalCity"
+            dense
             label="Arrival City"
             outlined
-            dense
         />
       </v-col>
     </v-row>
 
-      <v-col cols="12">
-        <h3 class="text-center mt-5">Choose a Flight</h3>
-      </v-col>
+    <v-col cols="12">
+      <h3 class="text-center mt-5">Choose a Flight</h3>
+    </v-col>
     <v-row>
       <v-col v-if="filteredFlights.length === 0" cols="12">
-        <v-alert type="info" color="light-blue" outlined>
+        <v-alert color="light-blue" outlined type="info">
           No flights to those filters right now, come back later!
         </v-alert>
       </v-col>
 
-      <v-col v-if="filteredFlights.length > 0" v-for="flight in filteredFlights" :key="flight.id" cols="12" md="4">
+      <v-col v-for="flight in filteredFlights" v-if="filteredFlights.length > 0" :key="flight.id" cols="12" md="4">
         <v-card class="ma-2">
           <v-card-title>
             <span class="headline">{{ flight.departureCity + ' -> ' + flight.arrivalCity }}</span>
           </v-card-title>
-          <v-card-subtitle>{{ formatDepartDate(flight.departOn) + ' -> ' + formatArriveDate(flight.arriveOn)}}</v-card-subtitle>
+          <v-card-subtitle>{{ formatDepartDate(flight.departOn) + ' -> ' + formatArriveDate(flight.arriveOn) }}
+          </v-card-subtitle>
 
           <v-card-text>
             <p><strong>Flight duration:</strong> {{ calculateDuration(flight.departOn, flight.arriveOn) }} hours</p>
             <p><strong>Price:</strong> €{{ Math.round(flight.price) }}</p>
           </v-card-text>
           <v-card-actions>
-            <v-btn @click="goToSeatSelection(flight)" color="primary">To Seats</v-btn>
+            <v-btn color="primary" @click="goToSeatSelection(flight)">To Seats</v-btn>
           </v-card-actions>
         </v-card>
       </v-col>
@@ -108,7 +109,7 @@ export default {
     const planeId = route.query.planeId;
 
     const goToSeatSelection = (flight) => {
-      axios.post("/api/seats/getSeats", null, {
+      axios.post("/api/seats", null, {
         params: {
           flightId: flight.id,
           planeId: flight.planeId,
@@ -128,18 +129,18 @@ export default {
 
   data() {
     return {
-      menuStart: false, // Muutujad menüü haldamiseks
-      menuEnd: false,   // Muutujad menüü haldamiseks
+      menuStart: false,
+      menuEnd: false,
       flights: [],
       filters: {
         arrivalCity: "",
         departureCity: "",
         startDate: "",
         endDate: "",
-        priceRange: [0, 500], // Algväärtus (min hind, max hind)
+        priceRange: [0, 500],
       },
-      minPrice: 0,    // Miinimum hind
-      maxPrice: 1000, // Maksimum hind
+      minPrice: 0,
+      maxPrice: 1000,
     };
   },
 
@@ -178,33 +179,32 @@ export default {
     },
   },
   methods: {
-      applyFilters() {
-        // Apply filter logic for flights
-        this.filteredFlights;
-      },
-      async fetchFlights() {
-        try {
-          const response = await axios.get("/api/flight", {
-            params: {planeId: this.planeId},
-          });
+    applyFilters() {
+      this.filteredFlights;
+    },
+    async fetchFlights() {
+      try {
+        const response = await axios.get("/api/flight", {
+          params: {planeId: this.planeId},
+        });
 
-          this.flights = response.data.map(flight => ({
-            ...flight,
-            departOn: new Date(flight.departOn), // Convert to Date object
-            arriveOn: new Date(flight.arriveOn), // Convert to Date object
-          }));
+        this.flights = response.data.map(flight => ({
+          ...flight,
+          departOn: new Date(flight.departOn),
+          arriveOn: new Date(flight.arriveOn),
+        }));
 
-          this.updatePriceRange();
-        } catch (error) {
-          console.error("Error fetching flights:", error);
-        }
-      },
-      calculateDuration(departOn, arriveOn) {
-        const departTime = new Date(departOn);
-        const arriveTime = new Date(arriveOn);
-        const duration = (arriveTime - departTime) / 1000 / 60 / 60;
-        return Math.round(duration.toFixed(2));
-      },
+        this.updatePriceRange();
+      } catch (error) {
+        console.error("Error fetching flights:", error);
+      }
+    },
+    calculateDuration(departOn, arriveOn) {
+      const departTime = new Date(departOn);
+      const arriveTime = new Date(arriveOn);
+      const duration = (arriveTime - departTime) / 1000 / 60 / 60;
+      return Math.round(duration.toFixed(2));
+    },
     formatDepartDate(date) {
       const d = new Date(date);
       const options = {
@@ -212,7 +212,7 @@ export default {
         day: '2-digit',
         hour: '2-digit',
         minute: '2-digit',
-        hour12: false // 24-tunnine kellaaeg
+        hour12: false
       };
       return d.toLocaleString('en-GB', options).replace(',', ''); // Saadab kuupäeva nagu 01/04/2025, 09:34:05
     },
@@ -221,23 +221,21 @@ export default {
       const options = {
         hour: '2-digit',
         minute: '2-digit',
-        hour12: false // 24-tunnine kellaaeg
+        hour12: false
       };
       return d.toLocaleString('en-GB', options).replace(',', ''); // Saadab kuupäeva nagu 01/04/2025, 09:34:05
     },
     updatePriceRange() {
-      // Eeldame, et lennu hinnad on olemas (näiteks `this.flights` massiivis)
       const prices = this.flights.map(flight => flight.price);
       this.minPrice = Math.min(...prices);
       this.maxPrice = Math.max(...prices);
-      this.filters.priceRange = [this.minPrice, this.maxPrice]; // Seadistab algväärtuse
+      this.filters.priceRange = [this.minPrice, this.maxPrice];
     },
   },
 
   watch: {
-    // Kui hinnavahemik muutub, rakendame filtreerimist uuesti
     'filters.priceRange': function (newValue) {
-      this.applyFilters(); // Igakord kui hind muutub, rakenda filtrit
+      this.applyFilters();
     },
   },
 
@@ -265,7 +263,6 @@ export default {
   padding: 5px;
 }
 
-/* Colors */
 .primary {
   background-color: #6FA1FF !important;
 }
@@ -288,30 +285,7 @@ export default {
   color: #6FA1FF;
 }
 
-.highlighted-day {
-  background-color: #4CAF50 !important;
-  color: white !important;
-  border-radius: 50%;
-}
 
-.highlighted-range-start {
-  background-color: #FFEB3B !important; /* Yellow for the start date */
-  color: #000 !important;
-  border-radius: 50%;
-}
-
-.highlighted-range-end {
-  background-color: #FF5722 !important; /* Red for the end date */
-  color: #fff !important;
-  border-radius: 50%;
-}
-
-.highlighted-day-range {
-  background: linear-gradient(to right, #A3CDFF, #A2F7FF) !important; /* Gradient for days between start and end */
-  color: white !important;
-}
-
-/* Custom slider styling */
 .v-range-slider {
   color: #A3CDFF;
 }

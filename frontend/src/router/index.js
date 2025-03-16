@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import {createRouter, createWebHistory} from 'vue-router'
 import SeatsView from '../views/SeatsView.vue';
 import StartView from "../views/StartView.vue";
 import FlightsView from "../views/FlightsView.vue";

@@ -8,6 +8,7 @@ export function getFlightDuration(departureTime, arrivalTime) {
 
     return `${hours}h ${minutes}m`;
 }
+
 export function increaseSeatCount(seatCount, updateLocalStorage, applyFilters) {
     if (seatCount < 72) {
         seatCount++;
