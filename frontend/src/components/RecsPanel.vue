@@ -61,7 +61,7 @@ export default {
         legroom: false,
         near: false,
       },
-      seatCount: 1,
+      seatCount: localStorage.getItem('seatCount') ? parseInt(localStorage.getItem('seatCount')) : 1, // Load from localStorage
       seats: [], // Stores all the seats
     };
   },
@@ -110,6 +110,8 @@ export default {
     increaseSeatCount() {
       if (this.seatCount < 72) {
         this.seatCount++;
+        this.updateLocalStorage();
+
       } else {
         console.log("❌ Ticket count cannot exceed 72");
       }
@@ -118,8 +120,14 @@ export default {
     decreaseSeatCount() {
       if (this.seatCount > 1) {
         this.seatCount--;
+        this.updateLocalStorage();
+
       }
     },
+  },
+
+  updateLocalStorage() {
+    localStorage.setItem('seatCount', this.seatCount);
   },
 };
 </script>

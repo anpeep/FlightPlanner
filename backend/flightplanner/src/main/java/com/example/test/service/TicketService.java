@@ -15,11 +15,18 @@ import java.util.List;
 public class TicketService {
 //    private final TicketRepository ticketRepository;
 //    private final TicketMapper ticketMapper;
-
-//    public TicketDTO getTicketByFlightId(Integer flightId) {
-//        return null;
-//    }
 //
-//    public List<TicketDTO> getTicketsByFlightId(Integer flightId) {
+//    public List<TicketDTO> getTicketsByFlightId(Integer flightId, Integer ticketCount) {
+//        // Oletame, et TicketRepository otsib lennu ID järgi pileteid
+//        List<Ticket> tickets = ticketRepository.findByFlightId(flightId);
+//
+//        // Kui on määratud piletite arv, siis piira tulemusi
+//        if (ticketCount != null && ticketCount > 0) {
+//
+//            tickets = tickets.stream().limit(ticketCount).toList();
+//        }
+//
+//        // Muuda Ticket objektid DTO-ks
+//        return tickets.stream().map(ticketMapper::toDTO).toList();
 //    }
 }

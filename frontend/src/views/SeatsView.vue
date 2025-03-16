@@ -15,19 +15,23 @@
           />
         </div>
       </div>
+
     </div>
 
 
   </div>
+  <TicketPanel />
+
 </template>
 
 <script>
 import axios from "axios";
 import Seat from "@/components/Seat.vue";
 import RecsPanel from "@/components/RecsPanel.vue";
+import TicketPanel from "@/components/TicketPanel.vue";
 
 export default {
-  components: { Seat, RecsPanel },
+  components: {TicketPanel, Seat, RecsPanel },
   data() {
     return {
       seats: [],
@@ -64,6 +68,8 @@ export default {
       this.generateSeats();
     },
     generateSeats() {
+      localStorage.setItem('recommendedSeats', JSON.stringify(this.recommendedSeats));
+
       const seatMap = new Map(this.bookedSeats.map(seat => [`${seat.row}${seat.seat_column}`, true]));
       const recommendedSeatMap = new Map(this.recommendedSeats.map(seat => [`${seat.row}${seat.seat_column}`, true])); // Muuda väärtuseks true
       const totalRows = 11;
@@ -116,18 +122,6 @@ export default {
 };
 </script>
 <style scoped>
-
-.airplane-body {
-  top: 30vh;
-  position: absolute;
-  right: 18vw;  /* Paigutab lennuki keha paremasse nurka */
-  transform: translate(50%, -50%); /* Korrigeerib keha positsiooni täpselt */
-}
-
-.airplane-image {
-  width: 100%;
-  max-width: 40vw;
-}
 
 .row {
   display: flex;

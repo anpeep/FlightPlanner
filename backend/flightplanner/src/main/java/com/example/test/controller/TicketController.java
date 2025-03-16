@@ -16,8 +16,8 @@ import java.util.List;
 public class TicketController {
 //    private final TicketService ticketService;
 //    @GetMapping()
-//    public ResponseEntity<List<TicketDTO>> getTickets(@RequestParam Integer flightId) {
-//        List<TicketDTO> tickets = ticketService.getTicketsByFlightId(flightId);
+//    public ResponseEntity<List<TicketDTO>> getTickets(@RequestParam Integer flightId, Integer ticketCount) {
+//        List<TicketDTO> tickets = ticketService.getTicketsByFlightId(flightId, ticketCount);
 //        return ResponseEntity.ok(tickets);
 //    }
 }
