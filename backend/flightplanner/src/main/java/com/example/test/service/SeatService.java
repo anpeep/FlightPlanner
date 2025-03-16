@@ -4,17 +4,14 @@ import com.example.test.dto.SeatDTO;
 import com.example.test.mapping.SeatMapper;
 import com.example.test.model.Plane;
 import com.example.test.model.Seat;
-import com.example.test.model.Ticket;
-import com.example.test.repository.FlightRepository;
 import com.example.test.repository.PlaneRepository;
 import com.example.test.repository.SeatRepository;
-import com.example.test.repository.TicketRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class SeatService {
@@ -22,9 +19,11 @@ public class SeatService {
     private final SeatRepository seatRepository;
     private final PlaneRepository planeRepository;
     private final SeatMapper seatMapper;
-    private final Random random = new Random();public Map<String, List<SeatDTO>> getSeatsByFlight(Integer flightId, Integer planeId) {
+    private final Random random = new Random();
+
+    public Map<String, List<SeatDTO>> getSeatsByFlight(Integer flightId, Integer planeId) {
         if (seatRepository.countByPlaneId(planeId) == 0) {
-            generateAndRecommendSeats(planeId, flightId);
+            generateBookedSeats(planeId, flightId);
         }
         List<Seat> allSeats = seatRepository.findByPlaneId(planeId);
         List<SeatDTO> seatDTOS = allSeats.stream()
@@ -35,19 +34,14 @@ public class SeatService {
         seatGroups.put("availableSeats", seatDTOS.stream().filter(seat -> seat.getAvailable() && !seat.getRecommended()).toList());
         seatGroups.put("bookedSeats", seatDTOS.stream().filter(seat -> !seat.getAvailable()).toList());
         seatGroups.put("recommendedSeats", seatDTOS.stream().filter(SeatDTO::getRecommended).toList());
-
-
         return seatGroups;
     }
 
-    public List<SeatDTO> generateAndRecommendSeats(Integer planeId, Integer flightId) {
+    public List<SeatDTO> generateBookedSeats(Integer planeId, Integer flightId) {
         Plane plane = planeRepository.findById(planeId)
             .orElseThrow(() -> new IllegalArgumentException("Plane not found with ID: " + planeId));
-
-        // If no seats exist for the plane, generate new seats
         if (seatRepository.countByPlaneId(planeId) == 0) {
             List<Seat> newSeats = new ArrayList<>();
-            // Generate seats for rows 1 to 11 with predefined seat positions
             for (int row = 1; row <= 11; row++) {
                 List<String> seatPositions = switch (row) {
                     case 1 -> List.of("C", "D", "E", "F");
@@ -61,42 +55,33 @@ public class SeatService {
                     seat.setRecommended(false);
                     seat.setRow(row);
                     seat.setSeat_column(pos);
-                    seat.setAvailable(true); // Initially, set all seats as available
+                    seat.setAvailable(true);
                     newSeats.add(seat);
                 }
             }
-
-            // Randomly assign some seats as booked
             int totalSeats = 72;
-            int bookedSeatsCount = random.nextInt(totalSeats - 1); // Random number of booked seats
-            Collections.shuffle(newSeats); // Shuffle seats to randomize which ones get booked
+            int bookedSeatsCount = random.nextInt(totalSeats - 1);
+            Collections.shuffle(newSeats);
             for (int i = 0; i < bookedSeatsCount; i++) {
-                newSeats.get(i).setAvailable(false); // Set the first `bookedSeatsCount` seats as booked
+                newSeats.get(i).setAvailable(false);
             }
-
-            // Save all newly created seats in the repository
             seatRepository.saveAll(newSeats);
         }
 
-        // Now fetch the available seats (do not touch booked seats)
         List<Seat> availableSeats = seatRepository.findByPlaneId(planeId).stream()
-            .filter(Seat::getAvailable) // Only consider available seats
+            .filter(Seat::getAvailable)
             .sorted(Comparator.comparingInt(Seat::getRow)
-                .thenComparing(seat -> seat.getSeat_column().charAt(0))) // Sort by row and column
+                .thenComparing(seat -> seat.getSeat_column().charAt(0)))
             .toList();
 
-        // Find adjacent seats for recommendation if needed (for example, if seatCount > 1)
         List<Seat> recommendedSeats = findExactAdjacentSeats(availableSeats, 1);
-        recommendedSeats.forEach(seat -> seat.setRecommended(true)); // Mark recommended seats
-
-        // Save the recommended seats to the repository
+        recommendedSeats.forEach(seat -> seat.setRecommended(true));
         seatRepository.saveAll(recommendedSeats);
         List<SeatDTO> seatDTOS = availableSeats.stream()
             .map(seatMapper::toDTO)
             .toList();
         seatDTOS.forEach(seat -> seat.setPlaneId(planeId));
 
-        // Return available seats as DTOs
         return seatDTOS;
     }
 
@@ -131,7 +116,6 @@ public class SeatService {
         List<Seat> allSeats = seatRepository.findByPlaneId(planeId);
         List<Seat> availableSeats = allSeats.stream().filter(Seat::getAvailable).toList();
 
-        // Kui filter 4 on sees ja seatCount > 1, siis otsime külgnevad istmed ette ära
         List<Seat> adjacentSeats;
         if (filters.contains(4) && seatCount > 1) {
             adjacentSeats = findExactAdjacentSeats(availableSeats, seatCount);
@@ -143,7 +127,6 @@ public class SeatService {
             .filter(seat -> {
                 boolean matchesAllFilters = true;
 
-                // Filtrid 1, 2 ja 3 jäävad samaks
                 if (filters.contains(1)) {
                     matchesAllFilters &= (seat.getSeat_column().equals("A") || seat.getSeat_column().equals("H"));
                 }
@@ -181,5 +164,4 @@ public class SeatService {
             .map(seatMapper::toDTO)
             .toList();
     }
-
 }

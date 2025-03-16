@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
-        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
@@ -24,17 +24,6 @@
                 <constraints nullable="false"/>
             </column>
             <column name="seat_column" type="varchar(1)">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
-        <createTable tableName="ticket">
-            <column name="id" type="int" autoIncrement="true">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-            <column name="seat_id" type="int">
-                <constraints nullable="false"/>
-            </column>
-            <column name="flight_id" type="int">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -70,22 +59,6 @@
             </column>
         </createTable>
 
-        <addForeignKeyConstraint
-                baseTableName="ticket"
-                baseColumnNames="seat_id"
-                referencedTableName="seat"
-                referencedColumnNames="id"
-                constraintName="fk_ticket_seat"/>
-
-        <!-- Foreign key: ticket.flight_id references flight.id -->
-        <addForeignKeyConstraint
-                baseTableName="ticket"
-                baseColumnNames="flight_id"
-                referencedTableName="flight"
-                referencedColumnNames="id"
-                constraintName="fk_ticket_flight"/>
-
-        <!-- Foreign key: seating.plane_id references plane.id -->
         <addForeignKeyConstraint
                 baseTableName="seat"
                 baseColumnNames="plane_id"

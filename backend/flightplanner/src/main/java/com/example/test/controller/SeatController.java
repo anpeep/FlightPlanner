@@ -1,14 +1,13 @@
 package com.example.test.controller;
 
 import com.example.test.dto.SeatDTO;
-import com.example.test.model.Seat;
-import com.example.test.repository.SeatRepository;
 import com.example.test.service.SeatService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @RequestMapping("/api/seats")
@@ -16,16 +15,16 @@ import java.util.*;
 public class SeatController {
     private final SeatService seatService;
 
-    @PostMapping("/getSeats")
+    @PostMapping()
     public ResponseEntity<List<SeatDTO>> getSeats(
         @RequestParam Integer planeId,
         @RequestParam Integer flightId) {
-        System.out.println(" darkness here");
 
-        List<SeatDTO> seats = seatService.generateAndRecommendSeats(planeId, flightId);
+        List<SeatDTO> seats = seatService.generateBookedSeats(planeId, flightId);
         return ResponseEntity.ok(seats);
     }
-    @GetMapping("/getSeatsByFlight")
+
+    @GetMapping()
     public ResponseEntity<Map<String, List<SeatDTO>>> getSeatsByFlight(
         @RequestParam Integer flightId,
         @RequestParam Integer planeId) {
@@ -33,6 +32,7 @@ public class SeatController {
 
         return ResponseEntity.ok(allSeats);
     }
+
     @PostMapping("/addFilters")
     public ResponseEntity<List<SeatDTO>> setRecommendedSeats(
         @RequestParam Integer flightId,

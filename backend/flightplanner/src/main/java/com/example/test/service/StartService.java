@@ -1,7 +1,6 @@
 package com.example.test.service;
 
 import com.example.test.Constants;
-import com.example.test.mapping.FlightMapper;
 import com.example.test.model.Flight;
 import com.example.test.model.Plane;
 import com.example.test.repository.FlightRepository;
@@ -15,13 +14,14 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-@RequiredArgsConstructor
 
+@RequiredArgsConstructor
 @Service
 public class StartService {
     private final PlaneRepository planeRepository;
     private final FlightRepository flightRepository;
     Random random = new Random();
+
     public Integer generateRandomFlights() {
         flightRepository.deleteAll();
         planeRepository.deleteAll();
@@ -29,8 +29,7 @@ public class StartService {
         LocalDate today = LocalDate.now();
         LocalDate nextMonthSameDay = today.plusMonths(1);
         int daysBetween = (int) (nextMonthSameDay.toEpochDay() - today.toEpochDay());
-        Plane plane = planeRepository.save(new Plane()); // Create & Save Plane First
-
+        Plane plane = planeRepository.save(new Plane());
         List<Flight> flights = new ArrayList<>();
 
         for (int i = 0; i < 20; i++) {
@@ -54,11 +53,11 @@ public class StartService {
             flight.setPlane(plane);
             flights.add(flight);
         }
-        plane.setFlights(flights);  // Seome kõik loodud lennud lennukiga
-        flightRepository.saveAll(flights);  // Salvestame kõik lennud
-        planeRepository.save(plane);  // Salvestame lennuki
+        plane.setFlights(flights);
+        flightRepository.saveAll(flights);
+        planeRepository.save(plane);
 
-        return plane.getId(); // Tagastame planeId
+        return plane.getId();
     }
 
 

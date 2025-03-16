@@ -13,9 +13,9 @@ import java.util.List;
 
 public class Plane {
 
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Make sure this is present
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     private Integer id;
-    @OneToMany(mappedBy = "plane", cascade = CascadeType.ALL) // Seome lennud automaatselt
+    @OneToMany(mappedBy = "plane", cascade = CascadeType.ALL)
     private List<Flight> flights;
 }

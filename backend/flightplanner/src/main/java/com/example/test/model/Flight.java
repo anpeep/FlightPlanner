@@ -12,13 +12,11 @@ import java.time.Instant;
 @Table(name = "flight")
 public class Flight {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)  // Add this line to auto-generate the ID
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
     @ManyToOne
     @JoinColumn(name = "plane_id")
     private Plane plane;
-
     private String departureCity;
     private String arrivalCity;
     private Instant departOn;

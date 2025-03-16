@@ -9,6 +9,4 @@ public class Constants {
         "ORD", "SYD", "AMS", "IST", "SFO", "BKK", "MIA", "MAD", "KUL", "SEA", "YYZ",
         "BOM", "DEL", "DUB", "ZRH", "MEL", "YVR", "VIE", "LIS", "BRU", "CGK", "BKK"
     );
-
-    static List<String> flights = null; // generate random flights
 }

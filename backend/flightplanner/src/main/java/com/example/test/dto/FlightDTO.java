@@ -13,7 +13,7 @@ public class FlightDTO {
     private String arrivalCity;
     private Instant departOn;
     private Instant arriveOn;
-    private Integer planeId; // Lennuki ID
+    private Integer planeId;
     private Float price;
 
 }

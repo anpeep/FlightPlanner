@@ -1,4 +1,5 @@
 package com.example.test.model;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,7 +10,7 @@ import lombok.Setter;
 @Table(name = "seat")
 public class Seat {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)  // Add this line to auto-generate the ID
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     @ManyToOne
     @JoinColumn(name = "plane_id")
